@@ -1,2 +1,2 @@
 # momie
-A movie search engine
+A game search engine
