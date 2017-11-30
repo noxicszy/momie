@@ -26,6 +26,14 @@ def load_pickle(seed, max_page):
         bloomFilter = pickle.load(bloomFilter_pklf)
         bloomFilter_pklf.close()
 
+    if not os.path.exists('crawled_app.pkl'):
+        crawled_app = [False] * 1000000
+    else:
+        crawled_app_pklf = open('crawled_app.pkl', 'rb')
+        crawled_app = pickle.load(crawled_app_pklf)
+        crawled_pklf.close()
+
+
     #read to-crawl queue
     
     if not os.path.exists('tocrawl.pkl'):
@@ -34,16 +42,17 @@ def load_pickle(seed, max_page):
         tocrawl_pklf = open('tocrawl.pkl', 'rb')
         tocrawl_list = pickle.load(tocrawl_pklf)
         tocrawl_pklf.close()
-        tocrawl_list = [seed] + tocrawl_list
+        if seed:
+            tocrawl_list = [seed] + tocrawl_list
 
     tocrawl = Queue()
     for page in tocrawl_list:
         tocrawl.put(page)
         
-    return crawled, bloomFilter, tocrawl, tocrawl_list
+    return crawled, bloomFilter, crawled_app, tocrawl, tocrawl_list
 
 
-def dump_pickle(crawled, bloomFilter, tocrawl_list):
+def dump_pickle(crawled, bloomFilter, crawled_app, tocrawl_list):
     
     def dumpit(data, filename):
         pickle_file = open(filename, 'wb')
@@ -52,6 +61,7 @@ def dump_pickle(crawled, bloomFilter, tocrawl_list):
 
     dumpit(crawled, 'crawled.pkl')
     dumpit(bloomFilter, 'bloomFilter.pkl')
+    dumpit(crawled_app, 'crawled_app.pkl')
     # dump tocrawl_list in fact
     dumpit(tocrawl_list, 'tocrawl.pkl')
 
@@ -65,6 +75,11 @@ def getID(store_url):
     m = re.search("app/(\d+)/*", store_url)
     return str(m.group(1))
 
+def isInSteam(page):
+    return  'http://store.steampowered.com/app/' in page or \
+            'http://store.steampowered.com/games/' in page or \
+            'http://store.steampowered.com/search/' in page or \
+            'http://store.steampowered.com/tag/' in page \
 
 
 def valid_filename(s):
@@ -113,7 +128,7 @@ def add_page_to_folder(page, content, htmlpath):
 
 
 def crawl(page_number, htmlpath):
-    global tocrawl, crawled, graph, count, crawling, bloomFilter,varLock
+    global tocrawl, tocrawl_list, crawled, graph, count, crawling, bloomFilter, crawled_app, varLock
     
     varLock = threading.Lock()
     graph = {}
@@ -125,16 +140,18 @@ def crawl(page_number, htmlpath):
         global count
         while True:
             page = tocrawl.get()
-            tocrawl_list.pop()
+            tocrawl_list.pop(0)
             if not bloomFilter.query(page):
                 bloomFilter.add(page)
                 # skip apps with crawled ID, even though their url may change a litlle 
                 if isapp(page):
-                    if bloomFilter.query(getID(page)):
-                        print page, " is in bloomFilter"
+                    if crawled_app[int(getID(page))]:
+                        print "appid: {} has been crawled."
                         continue
                     else:
-                        bloomFilter.add(getID(page))
+                        if varLock.acquire():
+                            crawled_app[int(getID(page))] = True
+                            varLock.release()
 
                 
 
@@ -158,21 +175,21 @@ def crawl(page_number, htmlpath):
                             count += 1
 
                             #pickle dump
-                            dump_pickle(crawled, bloomFilter, tocrawl_list)
+                            dump_pickle(crawled, bloomFilter, crawled_app, tocrawl_list)
 
                         varLock.release()
 
                     print "thread", int(threading.current_thread().getName()), "crawlerd", page, "pagecount", count
                 
                 outlinks = get_all_links(content, page)
-                graph[page] = outlinks
 
                 for link in outlinks:
-                    if len(link) < 220 and ('http://store.steampowered.com/app/' in link or 'http://store.steampowered.com/games/' in link or 'http://store.steampowered.com/tag/' in link):
+                    if len(link) < 220 and isInSteam(link):
                         tocrawl.put(link)
                         tocrawl_list.append(link)
             else:
-                print page, " is in bloomFilter"
+                # print page, " is in bloomFilter"
+                pass
             
     threads = []
     for i in range(NUM):
@@ -192,14 +209,17 @@ if __name__ == '__main__':
     # seed = sys.argv[1]
     # max_page = sys.argv[2]
     # max_page = int(max_page)
+    
+    seed = "http://store.steampowered.com/games/"
+    # seed = None
 
     htmlpath = "html/"
-    seed = "http://store.steampowered.com/games/"
+
     #number of pages to crawled in one round
     page_number = 100
 
     #number of all steam apps
-    MAX_PAGE = 100000
+    MAX_PAGE = 200000
     #set cookie
     cookie = {
             'birthtime' : '28801',
@@ -210,12 +230,12 @@ if __name__ == '__main__':
             }
 
     #load data
-    crawled, bloomFilter, tocrawl, tocrawl_list = load_pickle(seed, MAX_PAGE)
+    crawled, bloomFilter, crawled_app, tocrawl, tocrawl_list = load_pickle(seed, MAX_PAGE)
 
     start_time = time.time()
 
     graph, crawled = crawl(page_number, htmlpath)
-    dump_pickle(crawled, bloomFilter, tocrawl_list)
+    dump_pickle(crawled, bloomFilter, crawled_app, tocrawl_list)
 
     delta_time = time.time() - start_time
     print str(delta_time) + 's'
