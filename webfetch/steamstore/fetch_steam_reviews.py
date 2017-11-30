@@ -53,50 +53,65 @@ def add_review_to_folder(appid, review, filename, reviewfolder):
 
 def fetchReviews(htmlpath):
 
-    nameToUrl = genNameToUrl('index.txt')
-    filelist =  os.listdir(htmlpath)
-    review_folder = "steam_reviews2/"
 
-    if not os.path.exists(review_folder):  
-        os.mkdir(review_folder)
-
-    #construct to-get-queue
-    appid_queue = Queue()
-    for filename in filelist:
-        store_url = nameToUrl[filename]
-        appid = getID(store_url)
-        appid_queue.put(appid)
-
-    #count
-    global count
-    count = 0
-
-    exceptionlog = open('exception.log', 'a')
-
-    exceptionlog.write('\n\n'+'-'*70+'\n'+time.asctime(time.localtime(time.time()))+'\n')
-    
     #to use multi-threading
     def working(appid_queue):
         global count
         while not appid_queue.empty():
             appid = appid_queue.get()
+            reviews = [''] * 5
             for page_num in range(5):
                 try:
-                    review = getReview(appid, page_num) 
+                    review = getReview(appid, page_num)
+                    reviews[page_num] = review 
                 except Exception, e:
                     print "Exception: ", e
                     exceptionlog.write(appid+": exception: "+str(e)+'\n')
                     continue
-                add_review_to_folder(appid, review, str(page_num), review_folder)
+
+            for page_num in range(5):
+                add_review_to_folder(appid, reviews[page_num], str(page_num), review_folder)
+
             count += 1
             print "thread", int(threading.current_thread().getName()), "fetched", appid, "count", count
 
-    NUM = 2
+
+
+    nameToUrl = genNameToUrl('index.txt')
+    review_folder = "steam_reviews/"
+    if not os.path.exists(review_folder):  
+        os.mkdir(review_folder)
+
+
+    #count
+    global count
+    count = 0
+
+
+    htmllist =  os.listdir(htmlpath)
+    reviewlist = os.listdir(review_folder)
+    
+    #construct to-get-queue
+    appid_queue = Queue()
+    for filename in htmllist:
+        store_url = nameToUrl[filename]
+        appid = getID(store_url)
+        if not appid in reviewlist:
+            appid_queue.put(appid)
+
+    print appid_queue.qsize(), "apps to fetch"
+
+    exceptionlog = open('exception.log', 'a')
+    exceptionlog.write('\n\n'+'-'*70+'\n'+time.asctime(time.localtime(time.time()))+'\n')
+
+
+    NUM = 10
     threads = []
     for i in range(NUM):
         t = threading.Thread(target=working, name=str(i), args=(appid_queue,))
         t.setDaemon(True)
         threads.append(t)
+
     for t in threads:
         t.start()
     for t in threads:
@@ -105,6 +120,7 @@ def fetchReviews(htmlpath):
     #write exception.log's ending
     exceptionlog.write('\n'+'-'*70+'\n\n')
     exceptionlog.close()
+
 if __name__ == '__main__':
 
     htmlpath = str(sys.argv[1])

@@ -79,7 +79,7 @@ def isInSteam(page):
     return  'http://store.steampowered.com/app/' in page or \
             'http://store.steampowered.com/games/' in page or \
             'http://store.steampowered.com/search/' in page or \
-            'http://store.steampowered.com/tag/' in page \
+            'http://store.steampowered.com/tag/' in page 
 
 
 def valid_filename(s):
@@ -172,10 +172,11 @@ def crawl(page_number, htmlpath):
                         else:
                             add_page_to_folder(page, content, htmlpath)
                             crawled.append(page)
-                            count += 1
 
+                            count += 1
+                            if count % 100 == 0:
                             #pickle dump
-                            dump_pickle(crawled, bloomFilter, crawled_app, tocrawl_list)
+                                dump_pickle(crawled, bloomFilter, crawled_app, tocrawl_list)
 
                         varLock.release()
 
