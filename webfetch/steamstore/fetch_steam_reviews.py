@@ -51,13 +51,13 @@ def add_review_to_folder(appid, review, filename, reviewfolder):
     f.write(review)               
     f.close()
 
-def fetchReviews(htmlpath):
+def fetchReviews(htmlpath, max_page):
 
 
     #to use multi-threading
     def working(appid_queue):
         global count
-        while not appid_queue.empty():
+        while not appid_queue.empty() and count<max_page:
             appid = appid_queue.get()
             reviews = [''] * 5
             for page_num in range(5):
@@ -105,7 +105,7 @@ def fetchReviews(htmlpath):
     exceptionlog.write('\n\n'+'-'*70+'\n'+time.asctime(time.localtime(time.time()))+'\n')
 
 
-    NUM = 10
+    NUM = 50
     threads = []
     for i in range(NUM):
         t = threading.Thread(target=working, name=str(i), args=(appid_queue,))
@@ -124,5 +124,9 @@ def fetchReviews(htmlpath):
 if __name__ == '__main__':
 
     htmlpath = str(sys.argv[1])
-    fetchReviews(htmlpath)
+    if len(sys.argv) < 3:
+        max_page = 9999999
+    else:
+        max_page = int(sys.argv[2])
+    fetchReviews(htmlpath, max_page)
 
