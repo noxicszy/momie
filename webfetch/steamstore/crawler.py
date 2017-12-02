@@ -31,8 +31,9 @@ def getID(store_url):
 def isInSteam(page):
     return  'http://store.steampowered.com/app/' in page or \
             'http://store.steampowered.com/games/' in page or \
-            'http://store.steampowered.com/search/' in page or \
-            'http://store.steampowered.com/tag/' in page 
+            'http://store.steampowered.com/software/' in page or \
+            'http://store.steampowered.com/tag/' in page or \
+            'http://store.steampowered.com/search/' in page 
 
 
 def valid_filename(s):
@@ -119,7 +120,7 @@ def preload(seed, max_page):
     # get crawled app
     nameToUrl = genNameToUrl('index.txt')
     htmllist =  os.listdir(htmlpath)
-    crawled_app = [False] * 1000000
+    crawled_app = [False] * 10000000
 
     for filename in htmllist:
         url = nameToUrl[filename]
@@ -151,7 +152,8 @@ def crawl(page_number, htmlpath):
             page = tocrawl.get()
             tocrawl_list.pop(0)
             if not bloomFilter.query(page):
-                
+                bloomFilter.add(page)
+
                 # skip apps with crawled ID, even though their url may change a litlle 
                 if isapp(page):
                     if crawled_app[int(getID(page))]:
@@ -184,18 +186,18 @@ def crawl(page_number, htmlpath):
 
                         
 
-                    print "thread", int(threading.current_thread().getName()), "crawlerd", page, "appcount", count
+                    print "thread", int(threading.current_thread().getName()), "crawled", page, "appcount", count
                 
                 
                 outlinks = get_all_links(content, page)
 
                 for link in outlinks:
-                    if len(link) < 220 and isInSteam(link):
+                    if len(link) < 220 and isInSteam(link) and not bloomFilter.query(link):
                         tocrawl.put(link)
                         tocrawl_list.append(link)
 
                 # crawling for current page finished, add to bloomfilter
-                bloomFilter.add(page)
+                
 
     threads = []
     for i in range(NUM):
@@ -241,4 +243,4 @@ if __name__ == '__main__':
 
     delta_time = time.time() - start_time
     print str(delta_time) + 's'
-    print len(crawled),'pages crawled' 
+    print sum(crawled_app),'pages crawled' 
