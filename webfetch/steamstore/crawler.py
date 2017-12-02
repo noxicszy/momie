@@ -7,63 +7,16 @@ import os, sys, time, re
 import threading
 import pickle
 
-
-def load_pickle(seed, max_page):
-    #read crawled 
-    if not os.path.exists('crawled.pkl'):
-        crawled = []
-    else:
-        crawled_pklf = open('crawled.pkl', 'rb')
-        crawled = pickle.load(crawled_pklf)
-        crawled_pklf.close()
-
+def dumpall(bloomFilter, tocrawl_list):
     
-    #read bloomfilter
-    if not os.path.exists('bloomFilter.pkl'):
-        bloomFilter = BloomFilter(max_page)
-    else:
-        bloomFilter_pklf = open('bloomFilter.pkl', 'rb')
-        bloomFilter = pickle.load(bloomFilter_pklf)
-        bloomFilter_pklf.close()
-
-    if not os.path.exists('crawled_app.pkl'):
-        crawled_app = [False] * 1000000
-    else:
-        crawled_app_pklf = open('crawled_app.pkl', 'rb')
-        crawled_app = pickle.load(crawled_app_pklf)
-        crawled_pklf.close()
-
-
-    #read to-crawl queue
-    
-    if not os.path.exists('tocrawl.pkl'):
-        tocrawl_list = [seed]
-    else:
-        tocrawl_pklf = open('tocrawl.pkl', 'rb')
-        tocrawl_list = pickle.load(tocrawl_pklf)
-        tocrawl_pklf.close()
-        if seed:
-            tocrawl_list = [seed] + tocrawl_list
-
-    tocrawl = Queue()
-    for page in tocrawl_list:
-        tocrawl.put(page)
-        
-    return crawled, bloomFilter, crawled_app, tocrawl, tocrawl_list
-
-
-def dump_pickle(crawled, bloomFilter, crawled_app, tocrawl_list):
-    
-    def dumpit(data, filename):
+    def dump_pickle(data, filename):
         pickle_file = open(filename, 'wb')
         pickle.dump(data, pickle_file)
         pickle_file.close()
 
-    dumpit(crawled, 'crawled.pkl')
-    dumpit(bloomFilter, 'bloomFilter.pkl')
-    dumpit(crawled_app, 'crawled_app.pkl')
+    dump_pickle(bloomFilter, 'bloomFilter.pkl')
     # dump tocrawl_list in fact
-    dumpit(tocrawl_list, 'tocrawl.pkl')
+    dump_pickle(tocrawl_list, 'tocrawl.pkl')
 
 
 
@@ -126,10 +79,66 @@ def add_page_to_folder(page, content, htmlpath):
     f.close()
 
 
+def genNameToUrl(indexFileName):
+    nameToUrl = {}
+    indexFile = open(indexFileName)
+    
+    for line in indexFile.readlines():
+        line = line.strip().split('\t')
+        url, name = line[0], line[1]
+        nameToUrl[name] = url
+    indexFile.close()
+    return nameToUrl
+
+def preload(seed, max_page):
+
+    # load bloomfilter
+    if not os.path.exists('bloomFilter.pkl'):
+        bloomFilter = BloomFilter(max_page)
+    else:
+        bloomFilter_pklf = open('bloomFilter.pkl', 'rb')
+        bloomFilter = pickle.load(bloomFilter_pklf)
+        bloomFilter_pklf.close()
+
+
+    # load to-crawl queue and list
+    if not os.path.exists('tocrawl.pkl'):
+        tocrawl_list = [seed]
+    else:
+        tocrawl_pklf = open('tocrawl.pkl', 'rb')
+        tocrawl_list = pickle.load(tocrawl_pklf)
+        tocrawl_pklf.close()
+        if seed:
+            tocrawl_list = [seed] + tocrawl_list
+
+    tocrawl = Queue()
+    for page in tocrawl_list:
+        tocrawl.put(page)
+
+
+    # get crawled app
+    nameToUrl = genNameToUrl('index.txt')
+    htmllist =  os.listdir(htmlpath)
+    crawled_app = [False] * 1000000
+
+    for filename in htmllist:
+        url = nameToUrl[filename]
+        appid = int(getID(url))
+        crawled_app[appid] = True
+
+    return bloomFilter, crawled_app, tocrawl, tocrawl_list
+
+
+
+
 
 def crawl(page_number, htmlpath):
-    global tocrawl, tocrawl_list, crawled, graph, count, crawling, bloomFilter, crawled_app, varLock
+    global tocrawl, tocrawl_list, count, bloomFilter, crawled_app, varLock
     
+
+
+
+
     varLock = threading.Lock()
     graph = {}
     count = 0
@@ -142,21 +151,15 @@ def crawl(page_number, htmlpath):
             page = tocrawl.get()
             tocrawl_list.pop(0)
             if not bloomFilter.query(page):
-                bloomFilter.add(page)
+                
                 # skip apps with crawled ID, even though their url may change a litlle 
                 if isapp(page):
                     if crawled_app[int(getID(page))]:
-                        print "appid: {} has been crawled."
+                        # print "appid: {} has been crawled.".format(getID(page))
                         continue
-                    else:
-                        if varLock.acquire():
-                            crawled_app[int(getID(page))] = True
-                            varLock.release()
 
-                
-
+                # start fetching
                 print "thread", int(threading.current_thread().getName()), "is crawling", page
-                
                 try:
                     content = get_page(page)
                 except Exception, e:
@@ -171,16 +174,18 @@ def crawl(page_number, htmlpath):
                             break
                         else:
                             add_page_to_folder(page, content, htmlpath)
-                            crawled.append(page)
-
+                            crawled_app[int(getID(page))] = True
                             count += 1
-                            if count % 100 == 0:
-                            #pickle dump
-                                dump_pickle(crawled, bloomFilter, crawled_app, tocrawl_list)
-
                         varLock.release()
+                        
+                    #pickle dump
+                    if count % 100 == 0:
+                        dumpall(bloomFilter, tocrawl_list)
 
-                    print "thread", int(threading.current_thread().getName()), "crawlerd", page, "pagecount", count
+                        
+
+                    print "thread", int(threading.current_thread().getName()), "crawlerd", page, "appcount", count
+                
                 
                 outlinks = get_all_links(content, page)
 
@@ -188,10 +193,10 @@ def crawl(page_number, htmlpath):
                     if len(link) < 220 and isInSteam(link):
                         tocrawl.put(link)
                         tocrawl_list.append(link)
-            else:
-                # print page, " is in bloomFilter"
-                pass
-            
+
+                # crawling for current page finished, add to bloomfilter
+                bloomFilter.add(page)
+
     threads = []
     for i in range(NUM):
         t = threading.Thread(target=working, name=str(i), args=(page_number, htmlpath))
@@ -202,41 +207,37 @@ def crawl(page_number, htmlpath):
     for t in threads:
         t.join()
 
-    return graph, crawled
+    return None
 
 
 
 if __name__ == '__main__':
-    # seed = sys.argv[1]
-    # max_page = sys.argv[2]
-    # max_page = int(max_page)
-    
-    seed = "http://store.steampowered.com/games/"
-    # seed = None
 
-    htmlpath = "html/"
+    MAX_PAGE = 200000 # number of all steam apps
+    # seed = "http://store.steampowered.com/games/"
+    htmlpath = sys.argv[1]
+    page_number = int(sys.argv[2]) #number of pages to crawled in one round
 
-    #number of pages to crawled in one round
-    page_number = 100
+    if len(sys.argv) < 4:
+        seed = None
+    else:
+        seed = sys.argv[3]
 
-    #number of all steam apps
-    MAX_PAGE = 200000
     #set cookie
     cookie = {
             'birthtime' : '28801',
             'path' : '/',
             'domain' : 'store.steampowered.com',
             'mature_content' : '1',
-
             }
 
-    #load data
-    crawled, bloomFilter, crawled_app, tocrawl, tocrawl_list = load_pickle(seed, MAX_PAGE)
+    #preload data
+    bloomFilter, crawled_app, tocrawl, tocrawl_list = preload(seed, MAX_PAGE)
 
     start_time = time.time()
 
-    graph, crawled = crawl(page_number, htmlpath)
-    dump_pickle(crawled, bloomFilter, crawled_app, tocrawl_list)
+    crawl(page_number, htmlpath)
+    dumpall(bloomFilter, tocrawl_list)
 
     delta_time = time.time() - start_time
     print str(delta_time) + 's'
