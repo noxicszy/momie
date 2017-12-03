@@ -60,17 +60,20 @@ def fetchReviews(htmlpath, max_page):
         while not appid_queue.empty() and count<max_page:
             appid = appid_queue.get()
             reviews = [''] * 5
+            got = [False] * 5
             for page_num in range(5):
                 try:
                     review = getReview(appid, page_num)
                     reviews[page_num] = review 
+                    got[page_num] = True
                 except Exception, e:
                     print "Exception: ", e
                     exceptionlog.write(appid+": exception: "+str(e)+'\n')
                     continue
 
             for page_num in range(5):
-                add_review_to_folder(appid, reviews[page_num], str(page_num), review_folder)
+                if got[page_num]:
+                    add_review_to_folder(appid, reviews[page_num], str(page_num), review_folder)
 
             count += 1
             print "thread", int(threading.current_thread().getName()), "fetched", appid, "count", count

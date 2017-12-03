@@ -143,7 +143,7 @@ def crawl(page_number, htmlpath):
     varLock = threading.Lock()
     graph = {}
     count = 0
-    NUM = 10
+    NUM = 20
 
 
     def working(page_number, htmlpath):
@@ -159,6 +159,10 @@ def crawl(page_number, htmlpath):
                     if crawled_app[int(getID(page))]:
                         # print "appid: {} has been crawled.".format(getID(page))
                         continue
+                    else:
+                        if varLock.acquire():
+                            crawled_app[int(getID(page))] = True
+                            varLock.release()
 
                 # start fetching
                 print "thread", int(threading.current_thread().getName()), "is crawling", page
@@ -170,23 +174,17 @@ def crawl(page_number, htmlpath):
                 
                 #save app pages
                 if isapp(page):
-                    if varLock.acquire():
-                        if count >= int(page_number):
-                            varLock.release()
-                            break
-                        else:
-                            add_page_to_folder(page, content, htmlpath)
-                            crawled_app[int(getID(page))] = True
-                            count += 1
-                        varLock.release()
+                    if count >= int(page_number):
+                        break
+                    else:
+                        add_page_to_folder(page, content, htmlpath)
+                        count += 1
                         
-                    #pickle dump
-                    if count % 100 == 0:
-                        dumpall(bloomFilter, tocrawl_list)
+                        #pickle dump
+                        if count % 100 == 0:
+                            dumpall(bloomFilter, tocrawl_list)
 
-                        
-
-                    print "thread", int(threading.current_thread().getName()), "crawled", page, "appcount", count
+                        print "thread", int(threading.current_thread().getName()), "crawled", page, "appcount", count
                 
                 
                 outlinks = get_all_links(content, page)
