@@ -101,6 +101,8 @@ def fetchReviews(htmlpath, max_page):
         appid = getID(store_url)
         if not appid in reviewlist:
             appid_queue.put(appid)
+        elif len(os.listdir(os.path.join(review_folder, appid)+'/')) < 5:
+            appid_queue.put(appid)
 
     print appid_queue.qsize(), "apps to fetch"
 
@@ -123,6 +125,7 @@ def fetchReviews(htmlpath, max_page):
     #write exception.log's ending
     exceptionlog.write('\n'+'-'*70+'\n\n')
     exceptionlog.close()
+
 
 if __name__ == '__main__':
 
