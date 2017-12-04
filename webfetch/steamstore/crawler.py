@@ -15,8 +15,7 @@ def dumpall(bloomFilter, tocrawl_list):
         pickle_file.close()
 
     dump_pickle(bloomFilter, 'bloomFilter.pkl')
-    # dump tocrawl_list in fact
-    dump_pickle(tocrawl_list, 'tocrawl.pkl')
+    dump_pickle(tocrawl_list, 'tocrawl.pkl')# dump tocrawl_list in fact
 
 
 
@@ -43,7 +42,7 @@ def valid_filename(s):
     return s
 
 def get_page(page):
-    response = requests.get(page, cookies=cookie, timeout=30)
+    response = requests.get(page, cookies=cookie, headers=header, timeout=30)
     content = response.text.encode('utf-8')
     return content
 
@@ -137,9 +136,6 @@ def crawl(page_number, htmlpath):
     global tocrawl, tocrawl_list, count, bloomFilter, crawled_app, varLock
     
 
-
-
-
     varLock = threading.Lock()
     graph = {}
     count = 0
@@ -152,6 +148,7 @@ def crawl(page_number, htmlpath):
             page = tocrawl.get()
             tocrawl_list.pop(0)
             if not bloomFilter.query(page):
+                # to prevent the case that near threads crawling the same page  
                 bloomFilter.add(page)
 
                 # skip apps with crawled ID, even though their url may change a litlle 
@@ -194,7 +191,7 @@ def crawl(page_number, htmlpath):
                         tocrawl.put(link)
                         tocrawl_list.append(link)
 
-                # crawling for current page finished, add to bloomfilter
+                
                 
 
     threads = []
@@ -230,6 +227,11 @@ if __name__ == '__main__':
             'domain' : 'store.steampowered.com',
             'mature_content' : '1',
             }
+
+    #set header
+    header = {
+        "Accept-Language" : "zh-CN,zh;q=0.9", 
+    }
 
     #preload data
     bloomFilter, crawled_app, tocrawl, tocrawl_list = preload(seed, MAX_PAGE)
