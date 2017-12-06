@@ -1,4 +1,4 @@
-
+# -*- coding:utf-8 -*-
 import requests, json
 import os, sys
 import re, time
@@ -34,12 +34,7 @@ def getReview(appid, page_num):
         "Accept-Language" : "zh-CN,zh", 
     }
     r = requests.get(url, params=data,  headers=header, timeout=30)
-    return r.text.decode('unicode_escape').encode('utf-8')#deal with unicode string
-
-def getID(store_url):
-    m = re.search("app/(\d+)/*", store_url)
-    return str(m.group(1))
-
+    return r.text.decode('unicode_escape').encode('utf-8') # deal with unicode string
 
 
 def add_review_to_folder(appid, review, filename, reviewfolder):   
@@ -47,9 +42,8 @@ def add_review_to_folder(appid, review, filename, reviewfolder):
     if not os.path.exists(folder):  
         os.mkdir(folder)
     filename = os.path.join(folder, filename)
-    f = open(filename, 'w')
-    f.write(review)               
-    f.close()
+    with open(filename, 'w') as f:
+        f.write(review)    
 
 def fetchReviews(htmlpath, max_page):
 
