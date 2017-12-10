@@ -1,0 +1,266 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>MUI Landing Page Example</title>
+		<link href="mui-0.9.30/css/mui.min.css" rel="stylesheet" type="text/css" />
+		<script src="mui-0.9.30/js/mui.min.js"></script>
+		<style>
+			/* Tutorial CSS goes here */
+			/**
+		 * Body CSS
+		 */
+			
+			html,
+			body {
+				height: 100%;
+			}
+			
+			html,
+			body,
+			input,
+			textarea,
+			buttons {
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+				text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
+			}
+			/**
+		 * Header CSS
+		 */
+			
+			header {
+				position: fixed;
+				top: 0;
+				right: 0;
+				left: 0;
+				z-index: 2;
+			}
+			
+			header ul.mui-list--inline {
+				margin-bottom: 0;
+			}
+			
+			header a {
+				color: white;
+			}
+			
+			header table {
+				width: 100%;
+			}
+			
+			button#modeswitcher {
+				font-size: 30px;
+				margin-bottom: 10px;
+			}
+			
+			#searchform {
+				position: fixed;
+				top: 0;
+				left: 50%;
+				width: 600px;
+				margin-left: -300px;
+			}
+			
+			@media only screen and (max-width: 770px) {
+				#searchform {
+					position: fixed;
+					top: 0;
+					left: 50%;
+					width: 100%;
+					margin-left: -50%;
+				}
+			}
+			
+			#submitbtn {
+				margin-bottom: -14px;
+				font-size: 18px;
+				font-size-adjust: inherit;
+			}
+			/**
+		 * Content CSS
+		 */
+			
+			#content-wrapper {
+				min-height: 100%;
+				/* sticky footer */
+				box-sizing: border-box;
+				margin-bottom: -100px;
+				padding-bottom: 100px;
+				display: flex;
+				flex-direction: row;
+			}
+			
+			.main-container{
+				width:66%;
+				margin: 1px;
+			}
+			
+			.item-container{
+				width:90%;
+				margin:3%;
+				padding:2%;
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+			}
+			
+			.mainpic-container {
+				width: 30%;
+				margin:0px;
+			}
+			
+			.mainpic-container img {
+				max-width: 90%;
+				max-height: 90%;
+			}
+			
+			.mainmsg-container {
+				width: 70%;
+				margin: 0px;
+			}
+			
+			.title{
+				font-size: 40px;
+			}
+			
+			.company{
+				font-size:20px;
+			}
+			
+			.like-container{
+				width:28%;
+				margin:1px;
+			}
+			/**
+		 * Footer CSS
+		 */
+			
+			footer {
+				box-sizing: border-box;
+				height: 100px;
+				background-color: #eee;
+				border-top: 1px solid #e0e0e0;
+				padding-top: 35px;
+			}
+		</style>
+		<script type="text/javascript">
+			function changemode() {
+				var MS = document.getElementById("modeswitcher");
+				var SI = document.getElementById("SearchInput");
+				if(MS.classList.contains("mui-btn--primary")) {
+					MS.innerHTML = "C";
+					MS.classList.remove("mui-btn--primary");
+					MS.classList.add("mui-btn--accent");
+					SI.action = "#companysearch";
+				} else {
+					MS.innerHTML = "G"
+					MS.classList.remove("mui-btn--accent");
+					MS.classList.add("mui-btn--primary");
+					SI.action = "#gamesearch"
+				}
+			}
+			
+			/*function getHeight(){
+				var piclist = document.getElementsByClassName("mainpic-container");
+				var msglist = document.getElementsByClassName("mainmsg-container");
+				var plist = document.getElementsByClassName("mainpic");
+				for(i=0;i<piclist.length;i++) {
+					if(piclist[i].offsetHeight > msglist[i].offsetHeight) {
+						msglist[i].style.height = piclist[i].offsetHeight +"px";
+						//plist[i].style.marginTop = (piclist[i].offsetHeight - plist[i].offsetHeight) / 2 + "px";
+					}
+					else{
+						piclist[i].style.height = msglist[i].offsetHeight + "px";
+						//plist[i].style.marginTop = (piclist[i].offsetHeight - plist[i].offsetHeight) / 2 + "px";
+					}	
+				}
+			}
+			window.onload = function() {
+				getHeight();
+			}*/
+		</script>
+	</head>
+
+	<body>
+		<!-- Tutorial HTML goes here -->
+		<header class="mui-appbar mui--z1">
+			<!-- Appbar HTML goes here -->
+			<div class="mui-container">
+				<table>
+					<tr class="mui--appbar-height">
+						<td class="mui--text-title">Momie</td>
+						<td class="mui--text-right">
+							<ul class="mui-list--inline mui--text-body2">
+								<li>
+									<a href="#">About</a>
+								</li>
+								<li>
+									<a href="#">Donate</a>
+								</li>
+							</ul>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div class="mui--text-center" id="searchform">
+				<ul class="mui-list--inline mui--text-body2">
+					<li>
+						<button class="mui-btn mui-btn--primary mui-btn--fab" id="modeswitcher" onclick="changemode()">
+							G
+							<span class="mui-btn__ripple-container">
+								<span class="mui-ripple"></span>
+							</span>
+						</button>
+					</li>
+					<li>
+						<form class="mui-form--inline" action="#gamesearch" id="SearchInput">
+							<div class="mui-textfield">
+								<input type="text" name="keywords" placeholder="GTA">
+							</div>
+							<button type="submit" class="mui-btn mui-btn--primary mui-btn--fab" id="submitbtn">Go!</button>
+						</form>
+					</li>
+				</ul>
+			</div>
+		</header>
+		<div class="mui--appbar-height"></div>
+		<div id="content-wrapper" class="mui--text-primary">
+			<!-- Content HTML goes here -->
+			<div class="mui-panel main-container">
+				<div class="mui-panel item-container">
+					<div class="mainpic-container">
+						<img class="mainpic" src="img/test.jpg">				
+					</div>
+					<div class="mainmsg-container">
+						<p class="title"><a style="color:#0b62a6">gamename</a></p>
+						<p class="mui--text-dark-hint company">company:</p>
+					</div>
+				</div>
+				<div class="mui-panel item-container">
+					<div class="mainpic-container">
+						<img class="mainpic" src="img/test.jpg">				
+					</div>
+					<div class="mainmsg-container">
+						<p class="title"><a style="color:#0b62a6">gamename</a></p>
+						<p class="mui--text-dark-hint company">company:</p>
+					
+					</div>
+				</div>
+			</div>
+			<div class="mui-panel like-container">
+				
+			</div>
+		</div>
+		<footer>
+			<div class="mui-container mui--text-center">
+				Made with ♥ by
+				<a href="https://www.muicss.com">MUICSS</a>
+			</div>
+		</footer>
+	</body>
+
+</html>
