@@ -6,10 +6,12 @@ import sys, os, lucene
 
 from java.io import File
 from org.apache.lucene.analysis.core import SimpleAnalyzer
+from org.apache.lucene.analysis.standard import StandardAnalyzer
 from org.apache.lucene.index import DirectoryReader
 from org.apache.lucene.queryparser.classic import QueryParser
 from org.apache.lucene.store import SimpleFSDirectory
 from org.apache.lucene.search import IndexSearcher
+from org.apache.lucene.search import NumericRangeQuery
 from org.apache.lucene.util import Version
 
 """
@@ -34,14 +36,14 @@ def run(searcher, analyzer):
         #import jieba
         #command = " ".join(jieba.cut(command))
         print "Searching for:", command
-        query = QueryParser(Version.LUCENE_CURRENT, "name",
-                            analyzer).parse(command)
+        #query = QueryParser(Version.LUCENE_CURRENT, "name",analyzer).parse(command)
+        query = NumericRangeQuery.newIntRange("id", 11111, 11111, True, True)
         scoreDocs = searcher.search(query, 50).scoreDocs
         print "%s total matching documents." % len(scoreDocs)
 
         for scoreDoc in scoreDocs:
             doc = searcher.doc(scoreDoc.doc)
-            print 'name:', doc.get("name"), '\ndescription:', doc.get("description"),'\nlist:', doc.get("list"),'\nseries:', doc.get("series"),"\n\n"
+            print 'id:', doc.get("id"),'name:', doc.get("name"), '\ndescription:', doc.get("description"),'\nlist:', doc.get("list"),'\nseries:', doc.get("series"),'\nvector:', doc.get("vector"),"\n\n"
 
 
 if __name__ == '__main__':
@@ -51,6 +53,6 @@ if __name__ == '__main__':
     #base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
     directory = SimpleFSDirectory(File(STORE_DIR))
     searcher = IndexSearcher(DirectoryReader.open(directory))
-    analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
+    analyzer = StandardAnalyzer(Version.LUCENE_CURRENT)
     run(searcher, analyzer)
     del searcher
