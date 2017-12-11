@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-^-coding:utf-8-^-
 """
-
+ 
 the data stored in the index system is based on pylucene.
 for each game, store the fields of  main name, other names and nickname                                     name
                                     the description passages of the game for rough search                   description
@@ -33,7 +33,8 @@ from org.apache.lucene.index import FieldInfo, IndexWriter, IndexWriterConfig,Te
 from org.apache.lucene.store import SimpleFSDirectory
 from org.apache.lucene.search import NumericRangeQuery
 from org.apache.lucene.util import Version
-
+from org.apache.lucene.search import IndexSearcher
+from org.apache.lucene.index import DirectoryReader
 """
 This class is loosely based on the Lucene (java implementation) demo class 
 org.apache.lucene.demo.IndexFiles.  It will take a directory as an argument
@@ -63,7 +64,7 @@ class IndexFiles(object):
 
         if not os.path.exists(storeDir):
             os.mkdir(storeDir)
-
+        #self.dir = storeDir
         self.store = SimpleFSDirectory(File(storeDir))
         self.analyzer = LimitTokenCountAnalyzer(analyzer, 1048576)
         
@@ -162,7 +163,8 @@ class IndexFiles(object):
                                 contents[key] = contents[key].encode("utf-8")
 
                             doc.add(Field(key, str(contents[key]), self.getfieldType(key)))
-                    writer.deleteDocuments(NumericRangeQuery.newIntRange("id", contents["id"], contents["id"], True, True))
+                    print contents["id"]
+                    writer.deleteDocuments(NumericRangeQuery.newIntRange("id", int(contents["id"]), int(contents["id"]), True, True))
                     writer.addDocument(doc)
                 # except Exception, e:
                 #     print "Failed in indexDocs:", e
@@ -188,22 +190,41 @@ class IndexFiles(object):
             writer.close()
     #TODO：增加update 在已有条目的基础上添加新field
     
-    def updatedoc(self,docvalue,updates):
-        """
-        ！！！不能使用！！！
-        """
+    def updatedoc(self,appid,updates,mod = "add",writer = None):
         #the format of the updates:
         #[(field1,value1),().....]
-        config = IndexWriterConfig(Version.LUCENE_CURRENT, analyzer)
-        config.setOpenMode(IndexWriterConfig.OpenMode.APPEND)
-        writer = IndexWriter(self.store, config)
-        #writer.deleteDocuments((docvalue))
-        for i in updates:
+        opened = False
+        if writer == None:
+            opened = True
+            config = IndexWriterConfig(Version.LUCENE_CURRENT, analyzer)
+            config.setOpenMode(IndexWriterConfig.OpenMode.APPEND)
+            writer = IndexWriter(self.store, config)
+
+        searcher = IndexSearcher(DirectoryReader.open(self.store))
+
+        query = NumericRangeQuery.newIntRange("id", appid, appid, True, True)
+        scoreDocs = searcher.search(query, 50).scoreDocs
+        doc = searcher.doc(scoreDocs[0].doc) 
+        
+        for key,value in updates:
+            if mod=="add" and key!="vector" and key!="id":
+                old = doc.get(key)
+                if  old:
+                    value += " "+doc.get(key)
+            doc.removeField(key)
+            doc.add(Field(key,value, self.getfieldType(key))) 
             # java.lang.IllegalArgumentException: can only update NUMERIC or BINARY fields! field=name 内置updates不好用
-            writer.updateDocValues(Term(docvalue[0],docvalue[1]),Field(i[0], str(i[1]), self.getfieldType(i[0])))
+        writer.deleteDocuments(NumericRangeQuery.newIntRange("id", appid, appid, True, True))
+       
+        doc.removeField("id")
+        doc.add(IntField("id", appid, self.getfieldType("id"))) #实验证明id字段要重新添加，否则会变成unicode格式 日狗了
+        writer.addDocument(doc)
         print "update finished"
-        writer.commit()
-        writer.close()
+        if opened:
+            writer.commit()
+            writer.close()
+    
+    
 
 if __name__ == '__main__':
     """
@@ -223,10 +244,10 @@ if __name__ == '__main__':
                     """
         analyzer = StandardAnalyzer(Version.LUCENE_CURRENT)
         indexer = IndexFiles( "index", analyzer)
-        indexer.indexDocs('../datastore/indexer_tempdata',"append")### to make a new index, use create
-        docvalue = ("name","besiege") #不用提供整个名称     “besiege 围攻”是删不掉的
-        indexer.deletedoc(docvalue)
-        #indexer.updatedoc(docvalue,[("name","bs")])##!!!!不能使用
+        indexer.indexDocs('../datastore/indexer_tempdata',"create")### to make a new index, use create
+        # docvalue = ("name","besiege") #不用提供整个名称     “besiege 围攻”是删不掉的
+        # indexer.deletedoc(docvalue)
+        indexer.updatedoc(11111,[("name","bs")])
         end = datetime.now()
         print end - start
     #except Exception, e:
