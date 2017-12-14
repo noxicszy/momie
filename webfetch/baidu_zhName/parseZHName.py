@@ -27,7 +27,16 @@ def findZHName(content):
 
 
 baidu_folder = 'baidu_result/'
-baidulist = os.listdir(baidu_folder)[:10]
+baidulist = os.listdir(baidu_folder)
+
+# baidulist = []
+# with open('baidu_list.txt', 'r') as f:
+#     for line in f.readlines():
+#         x = line.strip()
+#         if x != '':
+#             baidulist.append(x)
+
+namefile = open('chinese_name.txt', 'w')
 
 for i in range(len(baidulist)):
     appid = baidulist[i]
@@ -47,10 +56,21 @@ for i in range(len(baidulist)):
                     zhName[name] = 1
 
     items = zhName.items()
-    items = sorted(items, lambda x, y: cmp(x[1], y[1]), reverse=True)
-    for key, value in items:
-        print appid, key, value
-    print 
+    # items = sorted(items, lambda x, y: cmp(x[1], y[1]), reverse=True)
+    max_value = -1
+    max_index = -1
+    for j in range(len(items)):
+        if items[j][1] > max_value:
+            max_value = items[j][1]
+            max_index = j
+
+    if max_index > -1 and items[max_index][1] > 10:
+        namefile.write('{}\t{}\t{}\n'.format(appid, items[max_index][0].encode('utf-8'), max_value))
+
+    if (i+1) % 50 == 0:
+        print i+1
+
+# namefile.close()
 # apppath = 'baidu_result/71240/'
 # filename = '1.html'
 # with open(os.path.join(apppath, filename), 'r') as f:
