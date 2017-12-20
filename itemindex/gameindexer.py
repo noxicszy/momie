@@ -12,12 +12,17 @@ for each game, store the fields of  main name, other names and nickname         
                                     the vecter using "words to vector" tech for sorting (not indexed)       vector
                                     the other links and contents to present to the user
                                                                                                             id
+                                                                                                            tags
                                     images
                                     facets??
     the system should first search the naming field which is presented at the top if it exists
     then search the human arranged lists
     and search the description passages,(it would be better if we can using the synax for key words)
         using the NLP model and the game vectors to sort the list
+
+2017-12-18 新增
+            TODO：利用nltk的maxentropy 训练sentiment analysis
+            TODO：利用Stanford的pos tagging 寻找语料中的动宾词汇对，添加到向量中
 """
 INDEX_DIR = "IndexFiles.index"
 
@@ -26,7 +31,7 @@ from datetime import datetime
 
 from java.io import File
 from org.apache.lucene.analysis.miscellaneous import LimitTokenCountAnalyzer
-from org.apache.lucene.analysis.core import SimpleAnalyzer
+from org.apache.lucene.analysis.core import SimpleAnalyzer,WhitespaceAnalyzer
 from org.apache.lucene.analysis.standard import StandardAnalyzer
 from org.apache.lucene.document import Document, Field, FieldType,IntField
 from org.apache.lucene.index import FieldInfo, IndexWriter, IndexWriterConfig,Term
@@ -80,6 +85,20 @@ class IndexFiles(object):
         ticker.tick = False
         print 'done'
         '''
+    
+    # def getanalyzer(self,fieldname):
+    #     t1types = ["series","name"]
+    #     t2types = ["description","list"]
+    #     t3types = ["vector"]
+    #     if fieldname in t1types:
+    #         #    print "t1"
+    #         analyzer = WhitespaceAnalyzer(Version.LUCENE_CURRENT)
+    #         return analyzer
+    #     # elif fieldname in t2types:
+    #     #     analyzer = SimpleAnalyzer((Version.LUCENE_CURRENT))
+    #     #     return analyzer
+    #     else :
+    #         return None
         
     
     def getfieldType(self,fieldname):
@@ -101,9 +120,8 @@ class IndexFiles(object):
         t3.setTokenized(False)
         #t3.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS_AND_POSITIONS)
 
-
-        t1types = ["series","name"]
-        t2types = ["description","list"]
+        t1types = ["series","name","tags","producer"]
+        t2types = ["description","list","review"]
         t3types = ["vector"]
         #print fieldname
         if fieldname in t1types:
@@ -159,9 +177,10 @@ class IndexFiles(object):
                         if type(contents[key]) == int:
                             doc.add(IntField(key, contents[key], self.getfieldType(key)))
                         else:
-                            if type(contents[key]) != list:
+                            if type(contents[key]) != list: 
                                 contents[key] = contents[key].encode("utf-8")
-
+                            # ana = self.getanalyzer(key)
+                            # if ana:
                             doc.add(Field(key, str(contents[key]), self.getfieldType(key)))
                     print contents["id"]
                     writer.deleteDocuments(NumericRangeQuery.newIntRange("id", int(contents["id"]), int(contents["id"]), True, True))
@@ -192,7 +211,7 @@ class IndexFiles(object):
     
     def updatedoc(self,appid,updates,mod = "add",writer = None):
         #the format of the updates:
-        #[(field1,value1),().....]
+        #[(field 1,value 1),().....]
         opened = False
         if writer == None:
             opened = True
@@ -242,12 +261,21 @@ if __name__ == '__main__':
         IndexFiles(sys.argv[1], os.path.join(base_dir, INDEX_DIR),
                     StandardAnalyzer(Version.LUCENE_CURRENT))
                     """
-        analyzer = StandardAnalyzer(Version.LUCENE_CURRENT)
+
+        """
+        关于analyzer：
+        standardanalyzer会把中文汉字都切开
+        simpleanalyzer会把数字词去掉 如2048 但是数字只要前面有字母就不会被切，有标点也不行如 圣杯战争:2048
+                                        解决方法：把标题里面带有数字的全都前面加上字母 索引关键词 圣杯战争:a2048
+                                        对于搜索a2048 以及搜索 圣杯战争 有效。 但是直接搜索 圣杯战争:a2048 还是不会出来结果
+                                        所以直接去掉标点符号吧 圣杯战争2048
+        """
+        analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
         indexer = IndexFiles( "index", analyzer)
         indexer.indexDocs('../datastore/indexer_tempdata',"create")### to make a new index, use create
         # docvalue = ("name","besiege") #不用提供整个名称     “besiege 围攻”是删不掉的
         # indexer.deletedoc(docvalue)
-        indexer.updatedoc(11111,[("name","bs")])
+        #indexer.updatedoc(11111,[("name","bs")])
         end = datetime.now()
         print end - start
     #except Exception, e:

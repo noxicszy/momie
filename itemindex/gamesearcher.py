@@ -36,13 +36,16 @@ def run(searcher, analyzer):
         #import jieba
         #command = " ".join(jieba.cut(command))
         print "Searching for:", command
-        #query = QueryParser(Version.LUCENE_CURRENT, "name",analyzer).parse(command)
-        query = NumericRangeQuery.newIntRange("id", 11111, 11111, True, True)
+        query = QueryParser(Version.LUCENE_CURRENT, "name",analyzer).parse(command)
+        # query = NumericRangeQuery.newIntRange("id", 11111, 11111, True, True)
         scoreDocs = searcher.search(query, 50).scoreDocs
         print "%s total matching documents." % len(scoreDocs)
 
         for scoreDoc in scoreDocs:
             doc = searcher.doc(scoreDoc.doc)
+            print type(doc)
+            print type(doc.get("id"))
+            print doc.getField("id").numericValue()
             print 'id:', doc.get("id"),'name:', doc.get("name"), '\ndescription:', doc.get("description"),'\nlist:', doc.get("list"),'\nseries:', doc.get("series"),'\nvector:', doc.get("vector"),"\n\n"
 
 
@@ -53,6 +56,6 @@ if __name__ == '__main__':
     #base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
     directory = SimpleFSDirectory(File(STORE_DIR))
     searcher = IndexSearcher(DirectoryReader.open(directory))
-    analyzer = StandardAnalyzer(Version.LUCENE_CURRENT)
+    analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
     run(searcher, analyzer)
     del searcher
