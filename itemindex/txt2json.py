@@ -26,7 +26,7 @@ def contentparser(cont):
     except:
         print cont
         errors.append(cont)
-        return None
+        return ""
     return cont.encode("utf8")
 
 root = "../datastore/basic_info"
@@ -58,10 +58,13 @@ for root, dirnames, filenames in os.walk(root):
                         game["review"]= game["review"]+line+" "
             path = os.path.join(targetroot,filename+".json")
             game["review"] = contentparser(game["review"])
+            if  game["review"] =="" :
+                del(game["review"])
             print game["id"] 
             with open(path,"w") as f:
                 json.dump(game,f,ensure_ascii=False)
 
-print errors
+with open("errors.txt","w")as f:
+    f.writelines(errors)
 
                                 

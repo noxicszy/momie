@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 #encoding=utf-8
+"""
+增加你搜索的是不是？
+方法使用局部靠近的hash，见（图片hash搜索）
+"""
 INDEX_DIR = "IndexFiles.index"
 
 import sys, os, lucene
@@ -36,15 +40,13 @@ def run(searcher, analyzer):
         #import jieba
         #command = " ".join(jieba.cut(command))
         print "Searching for:", command
-        query = QueryParser(Version.LUCENE_CURRENT, "name",analyzer).parse(command)
+        query = QueryParser(Version.LUCENE_CURRENT, "review",analyzer).parse(command)
         # query = NumericRangeQuery.newIntRange("id", 11111, 11111, True, True)
         scoreDocs = searcher.search(query, 50).scoreDocs
         print "%s total matching documents." % len(scoreDocs)
 
         for scoreDoc in scoreDocs:
             doc = searcher.doc(scoreDoc.doc)
-            print type(doc)
-            print type(doc.get("id"))
             print doc.getField("id").numericValue()
             print 'id:', doc.get("id"),'name:', doc.get("name"), '\ndescription:', doc.get("description"),'\nlist:', doc.get("list"),'\nseries:', doc.get("series"),'\nvector:', doc.get("vector"),"\n\n"
 
