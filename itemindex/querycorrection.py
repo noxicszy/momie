@@ -53,8 +53,13 @@ class QueryCorrecter():
             pickle.dump(self.buckets,f)
         
 
-
-
+    def modify(self,intext):
+        text = ""
+        for i in intext:
+            if i in string.ascii_letters or i in string.digits:
+                text = text+i
+        text = str(text.lower())
+        return text
     def hashvalue(self,p,c,d):
         # #p:d dimension integer vector list
         # #c:the wei
@@ -79,13 +84,7 @@ class QueryCorrecter():
         num  =float(num)/2
         num = num**(0.5)*2**7
         """
-        text = ""
-        for i in intext:
-            if i in string.ascii_letters or i in string.digits:
-                text = text+i
-        # text = re.sub(r'\d+',"",text)
-        # text = re.sub(r'\s+',"",text)
-        text = str(text.lower())
+        text = self.modify(intext)
         vector = []
         a = len(text)/2
         for i in range(2):
@@ -105,25 +104,40 @@ class QueryCorrecter():
         num  =float(num)/2
         num = num**(0.5)*2**7
         return int(num)
-                
-correcter = QueryCorrecter()
-#while True:
-for text in ["tunryourdestiny","trunthofedstiny","tunoureestany","turnourdetiny"]:
-    #text = raw_input()
-    ans = ""
-    print text
-    for i in range(len(correcter.keys)):
-        pos = correcter.calvec(text,correcter.keys[i])
-        #print correcter.buckets[i][pos]
-        res = correcter.buckets[i][pos]
-        res = res.lower()
-        res = re.sub(r'\s+',"",res)
-        # text = text.lower()
-        # text = re.sub(r'\s+',"",text)
-        ans = ans+res
-        #print res
-    assert "turnyourdestiny" in ans
+
+    def editdistancce(self,text1,text2):
+        # text1 = text1
+        # text2 = text2
+        distances = [[0]*(len(text1)+1) for i in range((len(text2)+1))]
+        for i in range(len(text1)+1):
+            distances[0][i] = i
+        for j in range(len(text2)+1):
+            distances[j][0] = j
+        for i in range(len(text1)):
+            for j in range(len(text2)):
+                if text1[i]!=text2[j]:
+                    distances[j+1][i+1] = min(distances[j][i],distances[j+1][i],distances[j][i+1])+1
+                else: 
+                    distances[j+1][i+1] = min(distances[j][i],distances[j+1][i],distances[j][i+1])
+        return distances[-1][-1]
+
+    def correct(self,name):
+        ans = {}
+        for i in range(len(correcter.keys)):
+            pos = correcter.calvec(name,correcter.keys[i])
+            res = correcter.buckets[i][pos]
+            res = res.split("\t")
+            for r in res: 
+                r = self.modify(r)
+                ans[r] = ans.get(r,0)+1
+        corre = sorted(ans.items(),key = lambda x: x[1],reverse=True)
+        name = self.modify(name)
+        for r in corre:
+            if self.editdistancce(name,r[0]) < float(len(name))/3.5:
+                return r[0]
+
     #print ans
-    
+correcter = QueryCorrecter()
+print correcter.correct("aur kingdm")    
 
 
