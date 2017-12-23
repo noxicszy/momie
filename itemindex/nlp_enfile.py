@@ -10,6 +10,10 @@ NLP设想：
 搞了一个Stanford nlp可以parse中文生成依赖关系，但是调用的过程最方便的是让它处理一个文件，并且现在没有
 找到一次启动然后处理好多文件的方法。然而那个东西处理句子速度还可以，但是每一次处理前的加载时间有15秒，
 所以解决的办法就是把我们想要处理的文件合成一个大文件，让它去处理好了再人工解回来。
+在那个Stanford parser full里面使用
+java -Xmx3g -XX:-UseGCOverheadLimit -cp "*" edu.stanford.nlp.parser.nndep.DependencyParser     -model edu/stanford/nlp/models/parser/nndep/UD_Chinese.gz     -tagger.model edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger     -textFile tdata/unparsedtext.txt -outFile tdata/chinese.txt.out
+试过了一下处理9千来行还是可以的。之前直接处理全部报了堆栈溢出bug，加了句号之后还没有再试过。
+下周见
 """
 import os
 import lucene
