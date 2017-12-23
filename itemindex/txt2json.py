@@ -11,7 +11,7 @@ parse the file by the way
 errors = []
 
 def nameparser(name):
-    punctuation = (string.punctuation+"‘（）。，、；’【、】`～！￥%……&×——+=-|：”《》？").decode('utf-8')
+    punctuation = (string.punctuation+"‘（）。，、；’【、】`～！￥%……&×——+=-|：”《》？,™,の,®").decode('utf-8')
     tempname = ""
     name = name.decode("utf8")
     for i in range(len(name)):

@@ -53,7 +53,7 @@ class avmarkov:
         #replace the english letter with X
         text  = text.lower()
         name = name.lower()
-        punctuation = (string.punctuation+"‘（）。，、；’【、】`～！￥%……&×——+=-|：”《》？").decode('utf-8')
+        punctuation = (string.punctuation+"‘（）。，、；’【、】`～！￥%……&×——+=-|：”《》？,™,の,®").decode('utf-8')
         #print punctuation
         # text = re.sub(r'[{}]+'.format(punctuation)," ",text) #为什么把英文字母也去掉了？
         for i in range(len(text)):
