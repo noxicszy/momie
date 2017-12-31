@@ -12,7 +12,7 @@ from pypinyin import pinyin, lazy_pinyin
     英文对于最后一个单词有一定的容错率
 调用：
     使用QueryGuesser()生成类
-    调用时使用 qg.guess(query) 返回一个list，全部是可能的guess 注意query一定是utf8格式
+    调用时使用 qg.guess(query) 返回一个list，全部是可能的guess 注意query一定是utf8格式 list长度没有限制
 
 原理：
     存储一个列表作为所有可行的猜测结果，使用二分搜索来寻找可能的结果
@@ -131,7 +131,7 @@ class QueryGuesser():
                 else: 
                     distances[j+1][i+1] = min(distances[j][i],distances[j+1][i],distances[j][i+1])
     
-        return distances[-1][-1]<=2
+        return distances[-1][-1]<=min(2,len(text1)-1)
     
     def similar(self,a,b):
         if len(b)<len(a):
@@ -206,8 +206,11 @@ class QueryGuesser():
 qg = QueryGuesser()
 #print correcter.correct("aur kingdm")    
 # print qg.modify("abc12#4沃日#ri".decode("utf8"))
-for i in qg.guess("逮".decode("utf8")):
-    print "[res]",i
+while True:
+
+    for i in qg.guess(raw_input().decode("utf8")):
+        print "[res]",i
+
 
 # for i in range(10):
 #     print "逮".join(qg.possibits[i+80] ).encode("utf8")#前84至100多大概为中文
