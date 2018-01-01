@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>momie home page 2</title>
+    <!-- Bootstrap -->
+    <link href="static/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="static/js/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="static/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <style>
+    body {
+        background-color: #60cbe9;
+    }
+
+    header {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        z-index: 2;
+    }
+
+    #mainbody {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #logo-helper {
+        height: 100px;
+    }
+
+    #input-container {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        width:100%;
+    }
+
+    #input-left{
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        width: 30%;
+    }
+
+    #input-left>ul{
+        padding-left: 0px;
+        width:100px;
+    }
+
+    #input-left>ul>li{
+        font-size: large;
+    }
+
+    #input-container .form-control {
+        height: 40px;
+        font-size: large;
+    }
+
+    .dropdown-toggle {
+        height: 40px;
+        font-size: large;
+    }
+
+    button#momie {
+        margin-left: 20px;
+        margin-top: 0;
+        width: 110px;
+        height: 40px;
+        font-size: 20px;
+    }
+    </style>
+    <script>
+    function game() {
+        var form = document.getElementById('input-container');
+        form.action = '';
+        var btn = document.getElementById('mydropdown');
+        btn.innerHTML = "Game ";
+        var caret = document.createElement('span');
+        caret.classList.add('caret');
+        btn.appendChild(caret);
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-info');
+        var ipt = document.getElementById('searchinput');
+        ipt.placeholder = "anything about a game";
+        var logo = document.getElementById('searchtype');
+        logo.innerHTML = "@Game";
+        var body = document.getElementById('body');
+        body.style.backgroundColor = "#60CBE9";
+    }
+
+    function company() {
+        var form = document.getElementById('input-container');
+        form.action = '';
+        var btn = document.getElementById('mydropdown');
+        btn.innerHTML = "Company ";
+        var caret = document.createElement('span');
+        caret.classList.add('caret');
+        btn.appendChild(caret);
+        btn.classList.remove('btn-info');
+        btn.classList.add('btn-warning');
+        var ipt = document.getElementById('searchinput');
+        ipt.placeholder = "talk about the company";
+        var logo = document.getElementById('searchtype');
+        logo.innerHTML = "@Company";
+        var body = document.getElementById('body');
+        body.style.backgroundColor = "#ffcc33"
+    }
+    </script>
+    <!-- the guesser -->
+    <script type="text/ecmascript">
+    function txtchange() {
+        var word = jQuery("#searchinput").val();
+        jQuery.ajax({
+            type: "GET",
+            url: "/gs?word=" + word,
+            dataType: "json",
+            async: true,
+            success: function(data) {
+                jQuery("#guessresults").html(""); //删除原有数据
+                if (data != "null") {
+                    for (var i = 0; i < jQuery(data).length; i++) {
+                        jQuery("#guessresults").append('<li class="list-group-item guesseritem" onclick="mousedown(this)">' + data[i] + '</li>');
+                    }
+                    jQuery('#guessresults').width(jQuery('#searchinput').width()+26);
+                    jQuery("#guessresults").slideDown();
+                }
+            }
+        });
+    }
+    //选择其中的提示内容
+    function mousedown(object) {
+        jQuery("#searchinput").val(jQuery(object).text());
+        jQuery("#guessresults").fadeOut();
+    }
+    //文档框失去焦点，隐藏提示内容
+    function lost() {
+        jQuery("#guessresults").fadeOut();
+    }
+    </script>
+    <style type="text/css">
+    .guesseritem:hover {
+        background-color: Gray;
+        cursor: pointer;
+    }
+    </style>
+</head>
+
+<body id='body'>
+    <header>
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Momie</a>
+                </div>
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" style="font-size:large">Introduction</a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#">Action</a>
+                                </li>
+                                <li>
+                                    <a href="#">Another action</a>
+                                </li>
+                                <li>
+                                    <a href="#">Something else here</a>
+                                </li>
+                                <li role="separator" class="divider"></li>
+                                <li>
+                                    <a href="#">Separated link</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.navbar-collapse -->
+            </div>
+            <!-- /.container-fluid -->
+        </nav>
+    </header>
+    <div id="mainbody">
+        <div id="logo-helper"></div>
+        <div id="logo" style="color: white;"><span style="font-size:70px;">Momie</span><span id='searchtype' style="font-size: 100px;">@Game</span></div>
+        <form id="input-container" action="" method='get'>
+            <div id='input-left'>
+                <div class="input-group">
+                    <div class="input-group-btn">
+                        <button id="mydropdown" type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Game <span class="caret"></span></button>
+                        <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-labelledby="dlabel">
+                            <li>
+                                <a href="#" onclick="game()">Game</a>
+                            </li>
+                            <li>
+                                <a href="#" onclick="company()">Company</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /btn-group -->
+                    <input id="searchinput" type="text" class="form-control" placeholder="anything about a game..." onkeyup="txtchange()" onblur="lost()" />
+                </div>
+                <!-- /input-group -->
+                <ul class="listgroup" id='guessresults'></ul>
+            </div>
+            <button type="submit" class="btn btn-primary" id="momie">momie</button>
+        </form>
+    </div>
+</body>
+
+</html>
