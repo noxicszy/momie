@@ -163,7 +163,7 @@ class QueryGuesser():
                 break 
         if not self.similar(x,self.possibits[mid]):
             mid+=1
-        print "[]"+" ".join(self.possibits[mid]).encode("utf8")
+        #print "[]"+" ".join(self.possibits[mid]).encode("utf8")
         high = mid
         low = mid
         # for i in range(-10,10):
@@ -203,17 +203,18 @@ class QueryGuesser():
         return res
 
     #print ans
-qg = QueryGuesser()
-#print correcter.correct("aur kingdm")    
-# print qg.modify("abc12#4沃日#ri".decode("utf8"))
-while True:
+if __name__ == '__main__':
+    qg = QueryGuesser()
+    #print correcter.correct("aur kingdm")    
+    # print qg.modify("abc12#4沃日#ri".decode("utf8"))
+    while True:
 
-    for i in qg.guess(raw_input().decode("utf8")):
-        print "[res]",i
+        for i in qg.guess(raw_input().decode("utf8")):
+            print "[res]",i
 
 
-# for i in range(10):
-#     print "逮".join(qg.possibits[i+80] ).encode("utf8")#前84至100多大概为中文
-# for i in qg.guess("train simulator")
+    # for i in range(10):
+    #     print "逮".join(qg.possibits[i+80] ).encode("utf8")#前84至100多大概为中文
+    # for i in qg.guess("train simulator")
 
 
