@@ -131,7 +131,7 @@ class QueryGuesser():
                 else: 
                     distances[j+1][i+1] = min(distances[j][i],distances[j+1][i],distances[j][i+1])
     
-        return distances[-1][-1]<=min(2,len(text1)-1)
+        return distances[-1][-1]<=min(2,len(text1)/3)
     
     def similar(self,a,b):
         if len(b)<len(a):
