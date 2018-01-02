@@ -13,6 +13,7 @@ for each game, store the fields of  main name, other names and nickname         
                                     the other links and contents to present to the user
                                                                                                             id
                                                                                                             tags
+                                                                                                            review
                                     images
                                     facets??
     the system should first search the naming field which is presented at the top if it exists
@@ -173,7 +174,7 @@ class IndexFiles(object):
                         contents = json.load(fil)
                     doc = Document()
                     for key in contents.keys():
-                        print key
+                        #print key
                         if type(contents[key]) == int:
                             doc.add(IntField(key, contents[key], self.getfieldType(key)))
                         else:
@@ -182,7 +183,7 @@ class IndexFiles(object):
                             # ana = self.getanalyzer(key)
                             # if ana:
                             doc.add(Field(key, str(contents[key]), self.getfieldType(key)))
-                    print contents["id"]
+                    #print contents["id"]
                     writer.deleteDocuments(NumericRangeQuery.newIntRange("id", int(contents["id"]), int(contents["id"]), True, True))
                     writer.addDocument(doc)
                 # except Exception, e:
@@ -203,7 +204,7 @@ class IndexFiles(object):
         #writer.deleteDocuments((docvalue))
         #writer.deleteDocuments(Term(docvalue[0],docvalue[1]))
         writer.deleteDocuments(NumericRangeQuery.newIntRange("id", 11111, 11111, True, True))
-        print "finished"
+        print "delete finished"
         if opened:
             writer.commit()
             writer.close()
@@ -272,7 +273,7 @@ if __name__ == '__main__':
         """
         analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
         indexer = IndexFiles( "index", analyzer)
-        indexer.indexDocs('../datastore/indexer_tempdata',"create")### to make a new index, use create
+        indexer.indexDocs('../datastore/json_info',"create")### to make a new index, use create
         # docvalue = ("name","besiege") #不用提供整个名称     “besiege 围攻”是删不掉的
         # indexer.deletedoc(docvalue)
         #indexer.updatedoc(11111,[("name","bs")])

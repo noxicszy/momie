@@ -7,7 +7,7 @@
 INDEX_DIR = "IndexFiles.index"
 
 import sys, os, lucene
-
+import jieba
 from java.io import File
 from org.apache.lucene.analysis.core import SimpleAnalyzer
 from org.apache.lucene.analysis.standard import StandardAnalyzer
@@ -27,37 +27,55 @@ search query entered against the 'contents' field.  It will then display the
 search.close() is currently commented out because it causes a stack overflow in
 some cases.
 """
-def run(searcher, analyzer):
-    while True:
-        print
-        print "Hit enter with no input to quit."
-        command = raw_input("Query:")
-        command = unicode(command,'utf8')
-        if command == '':
-            return
 
-        print
-        #import jieba
-        #command = " ".join(jieba.cut(command))
-        print "Searching for:", command
-        query = QueryParser(Version.LUCENE_CURRENT, "review",analyzer).parse(command)
+
+class GameSearcher:
+    def __init__(self,vm_env):
+        self.STORE_DIR = "index"
+        vm_env.attachCurrentThread()
+        print 'lucene', lucene.VERSION
+        #base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+        self.directory = SimpleFSDirectory(File(self.STORE_DIR))
+        self.searcher = IndexSearcher(DirectoryReader.open(self.directory))
+        self.analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
+
+    def keywordsearch(self,command,rankmod="defalt"):
+        """
+        rankmod 可以是可以改变的优先级排序，比如可以是“画质”，“剧情”，“人设”，“打击感”等等
+        返回一个doc字典构成的list
+        """
+        command = " ".join(jieba.cut(command))
+        # print "Searching for:", command
+        query = QueryParser(Version.LUCENE_CURRENT, "name",self.analyzer).parse(command)
         # query = NumericRangeQuery.newIntRange("id", 11111, 11111, True, True)
-        scoreDocs = searcher.search(query, 50).scoreDocs
-        print "%s total matching documents." % len(scoreDocs)
-
-        for scoreDoc in scoreDocs:
-            doc = searcher.doc(scoreDoc.doc)
-            print doc.getField("id").numericValue()
-            print 'id:', doc.get("id"),'name:', doc.get("name"), '\ndescription:', doc.get("description"),'\nlist:', doc.get("list"),'\nseries:', doc.get("series"),'\nvector:', doc.get("vector"),"\n\n"
+        scoreDocs = self.searcher.search(query, 20).scoreDocs
+        # print "%s total matching documents." % len(scoreDocs)
+        res = [self.searcher.doc(scoreDoc.doc) for scoreDoc in scoreDocs] 
+        # for scoreDoc in scoreDocs:
+        #     doc = self.searcher.doc(scoreDoc.doc)
+        return res
+            # print doc.getField("id").numericValue()
+            # print 'id:', doc.get("id"),'name:', doc.get("name"), '\ndescription:', doc.get("description"),'\nlist:', doc.get("list"),'\nseries:', doc.get("series"),'\nvector:', doc.get("vector"),"\n\n"
+    
+    def idget(self,ID):
+        query = NumericRangeQuery.newIntRange("id", ID, ID, True, True)
+        scoreDocs = self.searcher.search(query, 20).scoreDocs
+        return self.searcher.doc(scoreDocs[0].doc)
 
 
 if __name__ == '__main__':
     STORE_DIR = "index"
-    lucene.initVM(vmargs=['-Djava.awt.headless=true'])
+    vm_env=lucene.initVM(vmargs=['-Djava.awt.headless=true'])
     print 'lucene', lucene.VERSION
     #base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-    directory = SimpleFSDirectory(File(STORE_DIR))
-    searcher = IndexSearcher(DirectoryReader.open(directory))
-    analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
-    run(searcher, analyzer)
-    del searcher
+    searcher = GameSearcher(vm_env)
+    #while True:
+
+    if False:
+        for i in searcher.keywordsearch("上古卷轴".decode("utf8")):
+            print i.get("id"),i.get("name")
+    
+    d = searcher.idget(503430)
+    d = searcher.keywordsearch("Wolf Gang")[0]
+    print d.get("id"),d.get("name")
+    
