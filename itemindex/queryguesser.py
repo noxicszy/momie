@@ -197,7 +197,7 @@ class QueryGuesser():
         output with a list of guests
         """
         query = self.modify(query)
-        print query
+        #print query
         if query!=self.last_query[:len(query)]:
             self.last_h = len(self.possibits)
             self.last_l = 0
