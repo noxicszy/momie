@@ -16,6 +16,7 @@ from pypinyin import pinyin, lazy_pinyin
 
 原理：
     存储一个列表作为所有可行的猜测结果，使用二分搜索来寻找可能的结果
+TODO:guess 的结果应该有个排序
 """
 
 class QueryGuesser():
@@ -131,7 +132,7 @@ class QueryGuesser():
                 else: 
                     distances[j+1][i+1] = min(distances[j][i],distances[j+1][i],distances[j][i+1])
     
-        return distances[-1][-1]<=min(2,len(text1)/3)
+        return distances[-1][-1]<=min(2,len(text1)/4)
     
     def similar(self,a,b):
         if len(b)<len(a):
@@ -175,7 +176,16 @@ class QueryGuesser():
             low-=1
         self.last_h = high
         self.last_l = low
-        return self.possibits[low:high]
+        ans = []
+        i = 0
+        while i<max(high-mid,mid-low):
+            if i<high-mid:
+                ans.append(self.possibits[mid+i])
+            if i<mid-low and i:
+                ans.append(self.possibits[mid-i])
+            i+=1
+        return ans
+
         
 
 
@@ -187,6 +197,7 @@ class QueryGuesser():
         output with a list of guests
         """
         query = self.modify(query)
+        print query
         if query!=self.last_query[:len(query)]:
             self.last_h = len(self.possibits)
             self.last_l = 0
@@ -203,7 +214,7 @@ class QueryGuesser():
         return res
 
     #print ans
-if __name__ == '__main__':
+if __name__=="__main__":
     qg = QueryGuesser()
     #print correcter.correct("aur kingdm")    
     # print qg.modify("abc12#4沃日#ri".decode("utf8"))
@@ -213,8 +224,8 @@ if __name__ == '__main__':
             print "[res]",i
 
 
-    # for i in range(10):
-    #     print "逮".join(qg.possibits[i+80] ).encode("utf8")#前84至100多大概为中文
-    # for i in qg.guess("train simulator")
+# for i in range(10):
+#     print "逮".join(qg.possibits[i+80] ).encode("utf8")#前84至100多大概为中文
+# for i in qg.guess("train simulator")
 
 
