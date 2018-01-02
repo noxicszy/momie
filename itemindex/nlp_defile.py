@@ -39,7 +39,7 @@ with open(FIL,"r")as f:
             if not len(newid):
                 continue
             if gameid :
-                with open(os.path.join(stordir,"tuplewords_{}.json").format(gameid),"w")as out:
+                with open(os.path.join(stordir,"{}.json").format(gameid),"w")as out:
                     json.dump(data,out,ensure_ascii=False)
             gameid = int(newid[0])
             data = {"nsubj":[],"amod":[],"dobj":[]}
