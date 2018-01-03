@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-^-coding:utf-8-^-
 """
+ 
 the data stored in the index system is based on pylucene.
 for each game, store the fields of  main name, other names and nickname                                     name
                                     the description passages of the game for rough search                   description
@@ -10,12 +11,19 @@ for each game, store the fields of  main name, other names and nickname         
                                     the producer                                                            producer
                                     the vecter using "words to vector" tech for sorting (not indexed)       vector
                                     the other links and contents to present to the user
+                                                                                                            id
+                                                                                                            tags
+                                                                                                            review
                                     images
                                     facets??
     the system should first search the naming field which is presented at the top if it exists
     then search the human arranged lists
     and search the description passages,(it would be better if we can using the synax for key words)
         using the NLP model and the game vectors to sort the list
+
+2017-12-18 新增
+            TODO：利用nltk的maxentropy 训练sentiment analysis
+            TODO：利用Stanford的pos tagging 寻找语料中的动宾词汇对，添加到向量中
 """
 INDEX_DIR = "IndexFiles.index"
 
@@ -24,12 +32,15 @@ from datetime import datetime
 
 from java.io import File
 from org.apache.lucene.analysis.miscellaneous import LimitTokenCountAnalyzer
-from org.apache.lucene.analysis.core import SimpleAnalyzer
-from org.apache.lucene.document import Document, Field, FieldType
+from org.apache.lucene.analysis.core import SimpleAnalyzer,WhitespaceAnalyzer
+from org.apache.lucene.analysis.standard import StandardAnalyzer
+from org.apache.lucene.document import Document, Field, FieldType,IntField
 from org.apache.lucene.index import FieldInfo, IndexWriter, IndexWriterConfig,Term
 from org.apache.lucene.store import SimpleFSDirectory
+from org.apache.lucene.search import NumericRangeQuery
 from org.apache.lucene.util import Version
-
+from org.apache.lucene.search import IndexSearcher
+from org.apache.lucene.index import DirectoryReader
 """
 This class is loosely based on the Lucene (java implementation) demo class 
 org.apache.lucene.demo.IndexFiles.  It will take a directory as an argument
@@ -59,7 +70,7 @@ class IndexFiles(object):
 
         if not os.path.exists(storeDir):
             os.mkdir(storeDir)
-
+        #self.dir = storeDir
         self.store = SimpleFSDirectory(File(storeDir))
         self.analyzer = LimitTokenCountAnalyzer(analyzer, 1048576)
         
@@ -75,6 +86,20 @@ class IndexFiles(object):
         ticker.tick = False
         print 'done'
         '''
+    
+    # def getanalyzer(self,fieldname):
+    #     t1types = ["series","name"]
+    #     t2types = ["description","list"]
+    #     t3types = ["vector"]
+    #     if fieldname in t1types:
+    #         #    print "t1"
+    #         analyzer = WhitespaceAnalyzer(Version.LUCENE_CURRENT)
+    #         return analyzer
+    #     # elif fieldname in t2types:
+    #     #     analyzer = SimpleAnalyzer((Version.LUCENE_CURRENT))
+    #     #     return analyzer
+    #     else :
+    #         return None
         
     
     def getfieldType(self,fieldname):
@@ -96,9 +121,8 @@ class IndexFiles(object):
         t3.setTokenized(False)
         #t3.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS_AND_POSITIONS)
 
-
-        t1types = ["series","name"]
-        t2types = ["description","list"]
+        t1types = ["series","name","tags","producer"]
+        t2types = ["description","list","review"]
         t3types = ["vector"]
         #print fieldname
         if fieldname in t1types:
@@ -107,6 +131,12 @@ class IndexFiles(object):
         elif fieldname in t2types:
         #    print "t2"
             return t2
+        elif fieldname=="id":
+            t4 = FieldType()
+            t4.setIndexed(True)
+            t4.setStored(True)
+            t4.setNumericType(FieldType.NumericType.INT)
+            return t4
         else:
             return t3
 
@@ -133,7 +163,8 @@ class IndexFiles(object):
                 if not filename.endswith('.json') and not filename.endswith('.JSON'):
                     continue
                 print "adding", filename
-                try:
+                #try:
+                if True:
                     path = os.path.join(root, filename)
 
                     with open(path,"r") as fil:
@@ -141,32 +172,79 @@ class IndexFiles(object):
                         #fil.encoding("utf-8")
                         #contents = json.loads(fil.read())
                         contents = json.load(fil)
-                    
                     doc = Document()
                     for key in contents.keys():
-                        print key
-                        if type(contents[key]) != list:
-                            contents[key] = contents[key].encode("utf-8")
-                        doc.add(Field(key, str(contents[key]), self.getfieldType(key)))
+                        #print key
+                        if type(contents[key]) == int:
+                            doc.add(IntField(key, contents[key], self.getfieldType(key)))
+                        else:
+                            if type(contents[key]) != list: 
+                                contents[key] = contents[key].encode("utf-8")
+                            # ana = self.getanalyzer(key)
+                            # if ana:
+                            doc.add(Field(key, str(contents[key]), self.getfieldType(key)))
+                    #print contents["id"]
+                    writer.deleteDocuments(NumericRangeQuery.newIntRange("id", int(contents["id"]), int(contents["id"]), True, True))
                     writer.addDocument(doc)
-                except Exception, e:
-                    print "Failed in indexDocs:", e
-                    failedfiles.append(filename)
+                # except Exception, e:
+                #     print "Failed in indexDocs:", e
+                #     failedfiles.append(filename)
         
         writer.commit()
         writer.close()
         print "Failed docs:",failedfiles
     
-    def deletedoc(self,docvalue):
-        config = IndexWriterConfig(Version.LUCENE_CURRENT, analyzer)
-        config.setOpenMode(IndexWriterConfig.OpenMode.APPEND)
-        writer = IndexWriter(self.store, config)
+    def deletedoc(self,docvalue,writer = None):
+        opened = False
+        if writer == None:
+            opened = True
+            config = IndexWriterConfig(Version.LUCENE_CURRENT, analyzer)
+            config.setOpenMode(IndexWriterConfig.OpenMode.APPEND)
+            writer = IndexWriter(self.store, config)
         #writer.deleteDocuments((docvalue))
-        writer.deleteDocuments(Term(docvalue[0],docvalue[1]))
-        print "finished"
-        writer.commit()
-        writer.close()
+        #writer.deleteDocuments(Term(docvalue[0],docvalue[1]))
+        writer.deleteDocuments(NumericRangeQuery.newIntRange("id", 11111, 11111, True, True))
+        print "delete finished"
+        if opened:
+            writer.commit()
+            writer.close()
     #TODO：增加update 在已有条目的基础上添加新field
+    
+    def updatedoc(self,appid,updates,mod = "add",writer = None):
+        #the format of the updates:
+        #[(field 1,value 1),().....]
+        opened = False
+        if writer == None:
+            opened = True
+            config = IndexWriterConfig(Version.LUCENE_CURRENT, analyzer)
+            config.setOpenMode(IndexWriterConfig.OpenMode.APPEND)
+            writer = IndexWriter(self.store, config)
+
+        searcher = IndexSearcher(DirectoryReader.open(self.store))
+
+        query = NumericRangeQuery.newIntRange("id", appid, appid, True, True)
+        scoreDocs = searcher.search(query, 50).scoreDocs
+        doc = searcher.doc(scoreDocs[0].doc) 
+        
+        for key,value in updates:
+            if mod=="add" and key!="vector" and key!="id":
+                old = doc.get(key)
+                if  old:
+                    value += " "+doc.get(key)
+            doc.removeField(key)
+            doc.add(Field(key,value, self.getfieldType(key))) 
+            # java.lang.IllegalArgumentException: can only update NUMERIC or BINARY fields! field=name 内置updates不好用
+        writer.deleteDocuments(NumericRangeQuery.newIntRange("id", appid, appid, True, True))
+       
+        doc.removeField("id")
+        doc.add(IntField("id", appid, self.getfieldType("id"))) #实验证明id字段要重新添加，否则会变成unicode格式 日狗了
+        writer.addDocument(doc)
+        print "update finished"
+        if opened:
+            writer.commit()
+            writer.close()
+    
+    
 
 if __name__ == '__main__':
     """
@@ -179,16 +257,26 @@ if __name__ == '__main__':
     start = datetime.now()
     #try:
     if True:
-        """
+        """ 
         base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
         IndexFiles(sys.argv[1], os.path.join(base_dir, INDEX_DIR),
                     StandardAnalyzer(Version.LUCENE_CURRENT))
                     """
+
+        """
+        关于analyzer：
+        standardanalyzer会把中文汉字都切开
+        simpleanalyzer会把数字词去掉 如2048 但是数字只要前面有字母就不会被切，有标点也不行如 圣杯战争:2048
+                                        解决方法：把标题里面带有数字的全都前面加上字母 索引关键词 圣杯战争:a2048
+                                        对于搜索a2048 以及搜索 圣杯战争 有效。 但是直接搜索 圣杯战争:a2048 还是不会出来结果
+                                        所以直接去掉标点符号吧 圣杯战争2048
+        """
         analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
         indexer = IndexFiles( "index", analyzer)
-        #indexer.indexDocs('tempdata',"create")### to make a new index, use create
-        docvalue = ("name","besiege") #不用提供整个名称     “besiege 围攻”是删不掉的
-        indexer.deletedoc(docvalue)
+        indexer.indexDocs('../datastore/json_info',"create")### to make a new index, use create
+        # docvalue = ("name","besiege") #不用提供整个名称     “besiege 围攻”是删不掉的
+        # indexer.deletedoc(docvalue)
+        #indexer.updatedoc(11111,[("name","bs")])
         end = datetime.now()
         print end - start
     #except Exception, e:

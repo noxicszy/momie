@@ -34,9 +34,9 @@ def getReview(appid, page_num):
         "Accept-Language" : "zh-CN,zh", 
     }
     r = requests.get(url, params=data,  headers=header, timeout=30).json()
-    
     # r = r.text.decode('unicode_escape').encode('utf-8') # deal with unicode string
     return r
+
 
 def add_review_to_folder(appid, review, filename, reviewfolder):   
     folder = reviewfolder+appid
