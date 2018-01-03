@@ -45,8 +45,9 @@ def getID(store_url):
 
 def valid_searchname(storeName):
     valid_chars = "-_.():&,\' %s%s" % (string.ascii_letters, string.digits)
-    searchName = ''.join(c for c in storeName if c in valid_chars)
-    return searchName
+    invalid_chars = ';™+–®°“”*!é[]/\#<>’²"•★|`～「″☆」‘！^／√❌＋ᵠ🍉†＜＞'.decode('utf-8')
+    searchName = ''.join(c for c in storeName if c not in invalid_chars)
+    return searchName.encode('utf-8')
 
 
 if __name__ == '__main__':
@@ -56,7 +57,6 @@ if __name__ == '__main__':
     htmllist =  os.listdir(htmlpath)
 
     namefname = 'app_name.txt'
-
     length = len(htmllist)
     inavailable = []
     id_name_list = []

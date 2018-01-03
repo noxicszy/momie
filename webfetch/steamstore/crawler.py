@@ -32,7 +32,8 @@ def isInSteam(page):
             'http://store.steampowered.com/games/' in page or \
             'http://store.steampowered.com/software/' in page or \
             'http://store.steampowered.com/tag/' in page or \
-            'http://store.steampowered.com/search/' in page 
+            'http://store.steampowered.com/search/' in page or\
+            'http://store.steampowered.com/search/sub/' in page
 
 
 def valid_filename(s):

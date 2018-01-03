@@ -37,8 +37,8 @@ def search(id_name_list, max_page):
     def working(to_search_queue):
         global count
         while not to_search_queue.empty() and count<max_page:
+
             appid, searchName = to_search_queue.get()
-            print searchName
             contents = [''] * 5
             got = [False] * 5
             for page_num in range(5):
@@ -56,7 +56,7 @@ def search(id_name_list, max_page):
                     add_pages_to_folder(appid, contents[page_num], str(page_num)+'.html', baidu_folder)
 
             count += 1
-            print 'thread {} searched:{}, appid: {}'.format(threading.current_thread().getName(), searchName, appid)
+            print 'thread {} searched:{}, appid:{}, count:{}'.format(threading.current_thread().getName(), searchName, appid, count)
 
 
     
@@ -84,7 +84,7 @@ def search(id_name_list, max_page):
     exceptionlog = open('exception.log', 'a')
     exceptionlog.write('\n\n'+'-'*70+'\n'+time.asctime(time.localtime(time.time()))+'\n')
 
-    NUM = 10
+    NUM = 50
     threads = []
     for i in range(NUM):
         t = threading.Thread(target=working, name=str(i), args=(to_search_queue,))
@@ -100,14 +100,21 @@ def search(id_name_list, max_page):
     exceptionlog.write('\n'+'-'*70+'\n\n')
     exceptionlog.close()
 
+if len(sys.argv) < 2:
+    max_page = 9999999
+else:
+    max_page = int(sys.argv[1])
 
 baidu_folder = "baidu_result/"
 page_per_app = 5
 
 id_name_list = []
 with open('app_name.txt', 'r') as f:
-    for line in f.readlines()[:10]:
+    for line in f.readlines():
         line = line.strip().split('\t')
+        if len(line) < 2:
+            continue
         id_name_list.append((line[0], line[1]))
 
-search(id_name_list, 2000)
+
+search(id_name_list, max_page)
