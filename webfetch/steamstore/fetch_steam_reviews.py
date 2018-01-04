@@ -33,8 +33,9 @@ def getReview(appid, page_num):
     header = {
         "Accept-Language" : "zh-CN,zh", 
     }
-    r = requests.get(url, params=data,  headers=header, timeout=30)
-    return r.text.decode('unicode_escape').encode('utf-8') # deal with unicode string
+    r = requests.get(url, params=data,  headers=header, timeout=30).json()
+    # r = r.text.decode('unicode_escape').encode('utf-8') # deal with unicode string
+    return r
 
 
 def add_review_to_folder(appid, review, filename, reviewfolder):   
@@ -42,8 +43,8 @@ def add_review_to_folder(appid, review, filename, reviewfolder):
     if not os.path.exists(folder):  
         os.mkdir(folder)
     filename = os.path.join(folder, filename)
-    with open(filename, 'w') as f:
-        f.write(review)    
+    with open(filename+'.json', 'w') as f:
+        f.write(json.dumps(review))    
 
 def fetchReviews(htmlpath, max_page):
 
@@ -123,10 +124,10 @@ def fetchReviews(htmlpath, max_page):
 
 if __name__ == '__main__':
 
-    htmlpath = str(sys.argv[1])
-    if len(sys.argv) < 3:
+    htmlpath = 'html/'
+    if len(sys.argv) < 2:
         max_page = 9999999
     else:
-        max_page = int(sys.argv[2])
+        max_page = int(sys.argv[1])
     fetchReviews(htmlpath, max_page)
 

@@ -57,7 +57,7 @@ if __name__ == '__main__':
     htmllist =  os.listdir(htmlpath)
 
     namefname = 'app_name.txt'
-    htmllist = htmllist[:1000]
+
     length = len(htmllist)
     inavailable = []
     id_name_list = []
