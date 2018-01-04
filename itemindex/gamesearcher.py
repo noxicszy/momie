@@ -62,14 +62,14 @@ class GameSearcher:
         scoreDocs = self.searcher.search(query, 20).scoreDocs
         return self.searcher.doc(scoreDocs[0].doc)
 
-STORE_DIR = "index"
+#STORE_DIR = "index"
 vm_env=lucene.initVM(vmargs=['-Djava.awt.headless=true'])
 print 'lucene', lucene.VERSION
 #base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+searcher = GameSearcher(vm_env)
 
-    
+
 if __name__ == '__main__':
-    searcher = GameSearcher(vm_env)
     #while True:
 
     if False:
