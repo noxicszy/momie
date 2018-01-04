@@ -32,7 +32,7 @@ with open("sentiment_score.txt","r") as f:
 
 root = "../datastore/duple_words"
 count = 0
-data = {}
+data = []
 datadir = "../datastore/vector_info"
 for root, dirnames, filenames in os.walk(root):
     for filename in filenames:
@@ -55,13 +55,14 @@ for root, dirnames, filenames in os.walk(root):
                         # print mod.similarity(tup[0],KeyWords[i].decode("utf8")),sentimentdic.get(tup[1].encode("utf8"),0)
         vector = [2*i/cont for i in vector]
         count+=1
-        data[int(filename.split(".")[0])] = vector
-        print filename.split(".")[0],count #这个速度3万个大概要跑两天（不过可以分到不同文件夹里面去跑）
+        data.append((int(filename.split(".")[0]),vector))
+        # data[int(filename.split(".")[0])] = vector
+        print filename.split(".")[0],count #这个速度3万个大概要跑两天（不过可以分到不同文件夹里面去跑） 10:00 65个
         if count%200 == 0:
             with open(os.path.join(datadir,"{}.pkl".format(count/200)),"wb") as f:
                 pickle.dump(data,f)
-                data = {}
-with open(os.path.join(datadir,"{}.pkl".format(count/200)),"wb") as f:
+                data = []
+with open(os.path.join(datadir,"{}.pkl".format(count/200+1)),"wb") as f:
     pickle.dump(data,f)
 
 

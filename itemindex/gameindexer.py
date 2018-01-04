@@ -224,6 +224,11 @@ class IndexFiles(object):
 
         query = NumericRangeQuery.newIntRange("id", appid, appid, True, True)
         scoreDocs = searcher.search(query, 50).scoreDocs
+        if not scoreDocs:
+            print appid,"not found"
+            if opened:
+                writer.close()
+            return
         doc = searcher.doc(scoreDocs[0].doc) 
         
         for key,value in updates:
@@ -239,7 +244,7 @@ class IndexFiles(object):
         doc.removeField("id")
         doc.add(IntField("id", appid, self.getfieldType("id"))) #实验证明id字段要重新添加，否则会变成unicode格式 日狗了
         writer.addDocument(doc)
-        print "update finished"
+        print appid,"update finished"
         if opened:
             writer.commit()
             writer.close()
@@ -273,10 +278,10 @@ if __name__ == '__main__':
         """
         analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
         indexer = IndexFiles( "index", analyzer)
-        indexer.indexDocs('../datastore/json_info',"create")### to make a new index, use create
+        #indexer.indexDocs('../datastore/json_info',"create")### to make a new index, use create
         # docvalue = ("name","besiege") #不用提供整个名称     “besiege 围攻”是删不掉的
         # indexer.deletedoc(docvalue)
-        #indexer.updatedoc(11111,[("name","bs")])
+        #indexer.updatedoc(446640,[("vector","11111111")])
         end = datetime.now()
         print end - start
     #except Exception, e:
