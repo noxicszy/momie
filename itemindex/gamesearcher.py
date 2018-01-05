@@ -49,6 +49,13 @@ class GameSearcher:
                 tempname+=name[i]
         return tempname.encode("utf8")
 
+    def producersearch(self,command):
+        command = " ".join(jieba.cut(command))
+        query = QueryParser(Version.LUCENE_CURRENT, "producer",self.analyzer).parse(command)
+        scoreDocs = self.searcher.search(query, 20).scoreDocs
+        res = [self.searcher.doc(scoredoc.doc) for scoredoc in scoreDocs]
+        return res
+
 
     def keywordsearch(self,command,rankmod=0):
         """
@@ -60,11 +67,9 @@ class GameSearcher:
         info = {}
         #第一级 搜索名字
         #不如直接利用querycorrection和queryguesser
-        if not command:
-            return []
-        if self.namemodifier(command):
-            query = QueryParser(Version.LUCENE_CURRENT, "name",self.analyzer).parse(self.namemodifier(command))
-        
+        if not self.namemodifier(command):
+            return
+        query = QueryParser(Version.LUCENE_CURRENT, "name",self.analyzer).parse(self.namemodifier(command))
         scoreDocs = self.searcher.search(query, 20).scoreDocs
         for scoreDoc in scoreDocs:
             docid = self.searcher.doc(scoreDoc.doc).get("id")
@@ -112,13 +117,15 @@ searcher = GameSearcher(vm_env)
 
 
 if __name__ == '__main__':
-    #while True:
-
-    while True:
+    
+    if False:
+    # while True:
         for i in searcher.keywordsearch(raw_input(),1):#.decode("utf8")):
             print i.get("id"),i.get("name"),i.get("vector")
-    
-    # d = searcher.idget(503430)
-    # d = searcher.keywordsearch("Wolf Gang")[0]
-    # print d.get("id"),d.get("name")
+    else:
+        # d = searcher.idget(503430)
+        # d = searcher.keywordsearch("Wolf Gang")[0]
+        ds = searcher.producersearch("arts")
+        for d in ds:
+            print d.get("id"),d.get("name")
     
