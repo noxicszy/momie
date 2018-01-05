@@ -107,7 +107,6 @@ class GameSearcher:
 
 #STORE_DIR = "index"
 vm_env=lucene.initVM(vmargs=['-Djava.awt.headless=true'])
-print 'lucene', lucene.VERSION
 #base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 searcher = GameSearcher(vm_env)
 

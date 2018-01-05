@@ -114,10 +114,11 @@ class ImageSet:
         result = self.sortResult(similars, features)
         return result
             
-            
-            
+print 'loading imgs...'           
+imageSet = ImageSet()
+
+
 if __name__ == '__main__':
-    imageSet = ImageSet()
     targetname = 'test.jpg'
     targetimg = cv2.imread(targetname, cv2.IMREAD_COLOR)
     similars = imageSet.getSimilar(targetimg)
