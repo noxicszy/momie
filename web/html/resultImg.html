@@ -88,10 +88,10 @@ $def with(items)
 		</style>
 		<script>
 			function namedown(obj){
-				jQuery(obj).children('.panel-heading').slideDown('fast');
+				jQuery(obj).children('.panel-heading').slideDown();
 			}
 			function nameup(obj){
-				jQuery(obj).children('.panel-heading').slideUp('fast');
+				jQuery(obj).children('.panel-heading').slideUp();
 			}
 		</script>
 	</head>
@@ -136,7 +136,7 @@ $def with(items)
 		<div id='header-helper'></div>
 		<div id="body">
 			$for item in items:
-			<div class="panel panel-info item" onclick="window.open('')" onmouseover="namedown(this)" onmouseout="nameup(this)">
+			<div class="panel panel-info item" onclick="window.open('')" onmouseenter="namedown(this)" onmouseleave="nameup(this)">
 				<div class="panel-heading">$item['name']</div>
 				<div class="item-container">
 					<img class="mainpic" src="$item['imgurl']">
