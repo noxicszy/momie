@@ -39,6 +39,13 @@ class GameSearcher:
         self.directory = SimpleFSDirectory(File(self.STORE_DIR))
         self.searcher = IndexSearcher(DirectoryReader.open(self.directory))
         self.analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
+        self.weights = {
+            "name":10,
+            "names":5,
+            "tags":3,
+            "description":1,
+            "review":0.8
+        }
     
     def namemodifier(self,name):
         punctuation = (string.punctuation+"‘（）。，、；’【、】`～！￥%……&×——+=-|：”《》？,™,の,®").decode('utf-8')
@@ -72,31 +79,26 @@ class GameSearcher:
         query = QueryParser(Version.LUCENE_CURRENT, "name",self.analyzer).parse(self.namemodifier(command))
         scoreDocs = self.searcher.search(query, 20).scoreDocs
         for scoreDoc in scoreDocs:
+            #print scoreDoc.score,self.searcher.doc(scoreDoc.doc).get("name")
             docid = self.searcher.doc(scoreDoc.doc).get("id")
-            rank[docid] = scoreDoc.score*100
+            rank[docid] = 2.8**(scoreDoc.score-1)
             info[docid] = self.searcher.doc(scoreDoc.doc)
         
         command = " ".join(jieba.cut(command))
-        query = QueryParser(Version.LUCENE_CURRENT, "review",self.analyzer).parse(command)
-        scoreDocs = self.searcher.search(query, 20).scoreDocs
-        for scoreDoc in scoreDocs:
-            docid = self.searcher.doc(scoreDoc.doc).get("id")
-            rank[docid] = rank.get(docid,0)+scoreDoc.score*0.8
-            info[docid] = self.searcher.doc(scoreDoc.doc)
-
-        query = QueryParser(Version.LUCENE_CURRENT, "review",self.analyzer).parse(command)
-        scoreDocs = self.searcher.search(query, 20).scoreDocs
-        for scoreDoc in scoreDocs:
-            docid = self.searcher.doc(scoreDoc.doc).get("id")
-            rank[docid] = rank.get(docid,0)+scoreDoc.score
-            info[docid] = self.searcher.doc(scoreDoc.doc)
+        for field in self.weights.keys():
+            query = QueryParser(Version.LUCENE_CURRENT, field,self.analyzer).parse(command)
+            scoreDocs = self.searcher.search(query, 20).scoreDocs
+            for scoreDoc in scoreDocs:
+                docid = self.searcher.doc(scoreDoc.doc).get("id")
+                rank[docid] = rank.get(docid,0)+scoreDoc.score*self.weights[field]
+                info[docid] = self.searcher.doc(scoreDoc.doc)
         
         if rankmod:
             for i in rank.keys():
                 vector = info[i].get("vector")
                 if vector:
                     vector = vector[1:-1].split(",")
-                    print rank[i],(vector)[rankmod-1]
+                    print rank[i],vector[rankmod-1]
                     rank[i]+=float(vector[rankmod-1])*1000
         
         ran = sorted(rank.items(),key = lambda x :x[1],reverse=True)
@@ -118,10 +120,12 @@ searcher = GameSearcher(vm_env)
 
 if __name__ == '__main__':
     
-    if False:
-    # while True:
-        for i in searcher.keywordsearch(raw_input(),1):#.decode("utf8")):
-            print i.get("id"),i.get("name"),i.get("vector")
+    # if False:
+    if True:
+        while True:
+            for i in searcher.keywordsearch(raw_input(),1):#.decode("utf8")):
+                print i.get("id"),i.get("name"),i.get("vector")
+                pass
     else:
         # d = searcher.idget(503430)
         # d = searcher.keywordsearch("Wolf Gang")[0]
