@@ -40,16 +40,18 @@ ireader = DirectoryReader.open(directory)
 root = "../datastore/steam_reviews"
 for rot, dirnames, filenames in os.walk(root):
     for batch in range(12):
-        for appid in dirnames[int(float(len(dirnames))/12*batch):int(float(len(dirnames))/12*(batch+1))]:
-            with open("../datastore/nlp_raw/{}.txt".format(batch),"w")as f:
+        print batch
+        with open("../datastore/nlp_raw/{}.txt".format(batch),"w")as f:
+            for appid in dirnames[int(float(len(dirnames))/12*batch):int(float(len(dirnames))/12*(batch+1))]:
                 path = os.path.join(root,appid)
                 f.write("\n{} 行.\n".format(appid))
                 for rt,dinames,fnames in os.walk(path):
                     for fil in fnames:
                         with open(os.path.join(path,fil),"r") as ff:
                             content = json.load(ff)
-                            for i in content.get("reviews",[]):
+                            for i in content.get("reviews",[]):         
                                 f.write((i["review"]+".\n").encode("utf8"))
+    break
 
     #     doc = ireader.document(docnum)
     #     review = doc.get("review")
