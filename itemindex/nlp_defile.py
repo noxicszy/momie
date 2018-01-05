@@ -51,7 +51,7 @@ with open(FIL,"r")as f:
             data["amod"].append((re.findall(r"\((.+?)-",line)[0],re.findall(r", (.+?)-",line)[0]))
         elif line.split("(")[0]=="dobj" :
             data["dobj"].append((re.findall(r"\((.+?)-",line)[0],re.findall(r", (.+?)-",line)[0]))
-    with open(os.path.join(stordir,"tuplewords_{}.json").format(gameid),"w")as out:
+    with open(os.path.join(stordir,"{}.json").format(gameid),"w")as out:
                 json.dump(data,out,ensure_ascii=False)
 
             
