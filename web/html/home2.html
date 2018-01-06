@@ -151,7 +151,7 @@
         var word = jQuery("#searchinput").val();
         jQuery.ajax({
             type: "GET",
-            url: "/gs?word=" + word,
+            url: "/guesser?word=" + word,
             dataType: "json",
             async: true,
             success: function(data) {

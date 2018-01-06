@@ -146,10 +146,9 @@ class ImageSet:
         result = self.sortResult(similars, features)
         return result
             
-            
-            
+print 'loading image store...'
+imageSet = ImageSet()
 if __name__ == '__main__':
-    imageSet = ImageSet()
     start_time = time.time()
     targetname = 'test.jpg'
     targetimg = cv2.imread(targetname, cv2.IMREAD_COLOR)

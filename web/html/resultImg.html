@@ -25,7 +25,7 @@ $def with(items)
 				top: 0px;
 				right: 0px;
 				left: 0px;
-				z-index: 2;
+				z-index: 10;
 			}
 			
 			nav>div>div {
@@ -139,7 +139,7 @@ $def with(items)
 			<div class="panel panel-info item" onclick="window.open('')" onmouseenter="namedown(this)" onmouseleave="nameup(this)">
 				<div class="panel-heading">$item['name']</div>
 				<div class="item-container">
-					<img class="mainpic" src="$item['imgurl']">
+					<img class="mainpic" src="$item['imgurl']" alt="$item['name']">
 				</div>
 			</div>
 		</div>
