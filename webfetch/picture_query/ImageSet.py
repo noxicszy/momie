@@ -22,6 +22,12 @@ class ImageSet:
             with open('appids.pkl', 'rb') as pickle_file:
                 self.appids = pickle.load(pickle_file)
 
+    def dumpall():
+        with  open('baskets.pkl', 'wb') as pickle_file:
+            pickle.dump(self.baskets, pickle_file)
+        with  open('appids.pkl', 'wb') as pickle_file:
+            pickle.dump(self.appids, pickle_file)  
+
     def getHist(self, image):
         BGR = np.zeros(3)
         for y in range(len(image)):
@@ -118,7 +124,9 @@ class ImageSet:
             
 if __name__ == '__main__':
     imageSet = ImageSet()
+    start_time = time.time()
     targetname = 'test.jpg'
     targetimg = cv2.imread(targetname, cv2.IMREAD_COLOR)
     similars = imageSet.getSimilar(targetimg)
     print similars
+    print time.time() - start_time
