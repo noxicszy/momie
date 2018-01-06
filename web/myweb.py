@@ -24,7 +24,8 @@ urls = (
 	'/guesser', 'guesser',
 	'/gamesearch','gamesearch',
 	'/imgsearch','imgsearch',
-	'/rank','gamerank'
+	'/rank','gamerank',
+	'/companysearch','companysearch',
 )
 
 render = web.template.render('html')
@@ -41,6 +42,20 @@ def gamesearcher(command,rankmod=0):
 			})
 	return res
 
+def companysearcher(command):
+	vm_env.attachCurrentThread()
+	lresult = searcher.producersearch(command)
+	res = []
+	for game in lresult:
+		res.append({'name':game.get('name'),
+					'id':game.get('id'),
+					'producer':game.get('producer'),
+					'tags':game.get('tags').split(' ')[:min(12,len(game.get('tags').split(' ')))]
+			})
+	return res
+
+
+#get id by imgurl
 def getID(store_url):
     m = re.search("apps+/(\d+)/*", store_url)
     return str(m.group(1))
@@ -105,6 +120,13 @@ class gamerank:
 		rankmod = int(user_data.rankmod)
 		res = gamesearcher(keywords,rankmod)
 		return json.dumps(res)
+
+class companysearch:
+	def GET(self):
+		user_data = web.input()
+		keywords = user_data.keyword
+		res = companysearcher(keywords)
+		return render.resultCompany(keywords,res)
 
 if __name__ == '__main__':
 	app = web.application(urls,globals())
