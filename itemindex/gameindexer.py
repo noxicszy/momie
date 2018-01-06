@@ -121,7 +121,7 @@ class IndexFiles(object):
         t3.setTokenized(False)
         #t3.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS_AND_POSITIONS)
 
-        t1types = ["series","name","tags","producer"]
+        t1types = ["series","name","tags","producer","names"]
         t2types = ["description","list","review"]
         t3types = ["vector"]
         #print fieldname

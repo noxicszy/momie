@@ -1,0 +1,148 @@
+$def with(items)
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+		<title>momie game search results</title>
+
+		<!-- Bootstrap -->
+		<link href="static/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+		<script src="static/js/jquery.min.js"></script>
+		<!-- Include all compiled plugins (below), or include individual files as needed -->
+		<script src="static/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+		<style>
+			body{
+				background-color: #60CBE9;
+			}
+			
+			header {
+				position: fixed;
+				top: 0px;
+				right: 0px;
+				left: 0px;
+				z-index: 2;
+			}
+			
+			nav>div>div {
+				height: 50px;
+			}
+			
+			input {
+				width: 100px;
+			}
+			
+			nav#appbar {
+				margin: 0px;
+				//background-color: #5BC0DE;
+				//border-color: #46B8DA;
+			}
+			
+			#header-helper {
+				height: 70px;
+			}
+			
+			div#body {
+				display: flex;
+				flex-direction: row;
+				flex-wrap: wrap;
+				align-items: center;
+				justify-content: center;
+			}
+			
+			.item {
+				margin-top: 0px;
+				margin-bottom: 20px;
+				margin-left: 10px;
+				margin-right: 10px;
+				cursor: pointer;
+				max-width: 31%;
+				position:relative;
+			}
+			
+			.panel-heading{
+				border-radius: 0;
+				position: absolute;
+				top:0;
+				right:0;
+				left:0;
+				z-index:2;
+				font-size:40px;
+				text-align: center;
+				font-family: "microsoft yahei";
+				vertical-align: middle;
+			}
+			
+			.item-container {
+				padding: 0;
+				margin: 0px;
+			}
+			
+			.item-container img {
+				max-width: 100%;
+			}
+		</style>
+		<script>
+			function namedown(obj){
+				jQuery(obj).children('.panel-heading').slideDown();
+			}
+			function nameup(obj){
+				jQuery(obj).children('.panel-heading').slideUp();
+			}
+		</script>
+	</head>
+
+	<body>
+		<header>
+			<nav id="appbar" class="navbar navbar-default">
+				<div class="container-fluid">
+					<!-- Brand and toggle get grouped for better mobile display -->
+					<div class="navbar-header">
+						<a class="navbar-brand" href="#" style="color:#5bc0dc">Momie<span style="font-size:25px;">@Game</span></a>
+						<form class="navbar-form navbar-left" id='input-container' action='/gamesearch' role="search">
+							<div class="form-group">
+								<input style="width:250px;border:1px solid #5bc0dc;" name='keyword' id='input' type="text" class="form-control" placeholder="Search" required="true" value='' >
+							</div>
+							<div class="btn-group" role="group" aria-label="...">
+								<script>
+									function switchmomie(){
+										var keyword=jQuery('#input').val();
+										window.location.href = '/?keyword='+keyword;
+									}
+								</script>
+								<button type="submit" class="btn btn-info">momie</button>
+								<button type="button" class="btn btn-warning" onclick="switchmomie()">Switch to momie@Company</button>
+							</div>
+						</form>
+					</div>
+
+					<!-- Collect the nav links, forms, and other content for toggling -->
+					<div>
+						<ul class="nav navbar-nav navbar-right">
+							<li>
+								<a href="#" style="font-size:large">About</a>
+							</li>
+						</ul>
+					</div>
+					<!-- /.navbar-collapse -->
+				</div>
+				<!-- /.container-fluid -->
+			</nav>
+		</header>
+		<div id='header-helper'></div>
+		<div id="body">
+			$for item in items:
+			<div class="panel panel-info item" onclick="window.open('')" onmouseenter="namedown(this)" onmouseleave="nameup(this)">
+				<div class="panel-heading">$item['name']</div>
+				<div class="item-container">
+					<img class="mainpic" src="$item['imgurl']">
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>jQuery('.panel-heading').hide();</script>
+</html>

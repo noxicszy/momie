@@ -120,8 +120,10 @@ class ImageSet:
         result = self.sortResult(similars, features)
         return result
             
-            
-            
+print 'loading imgs...'           
+imageSet = ImageSet()
+
+
 if __name__ == '__main__':
     imageSet = ImageSet()
     start_time = time.time()
