@@ -187,4 +187,5 @@ if __name__ == '__main__':
         ds = searcher.producersearch("arts")
         for d in ds:
             print d.get("id"),d.get("name")
+        print searcher.idget(932843949).get('name')
     

@@ -1,4 +1,4 @@
-$def with(keyword,items)
+$def with(keyword,items,switched)
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -45,12 +45,21 @@ $def with(keyword,items)
 			#header-helper {
 				height: 53px;
 			}
+
+			#corrector{
+				width:100%;
+				background-color: #FFFCA4;
+			}
 			
 			#sort-methods{
 				width:100%;
 				text-align: center;
 				margin:0px;
 				padding:0px;
+			}
+
+			.rankbutton{
+				cursor:default;
 			}
 			
 			div#body {
@@ -142,7 +151,7 @@ $def with(keyword,items)
 			
 			.price-container{
 				width:20%;
-				font-size:50px;
+				font-size:40px;
 				color:#DD4B39;
 				text-align: center;
 				border:6px solid #39B3D7;
@@ -156,18 +165,19 @@ $def with(keyword,items)
 				jQuery(obj).siblings('.active').removeClass('active');
 				jQuery.ajax({
 					type: "GET",
-					url: "/rank?keyword=" + $keyword + "&amp;rankmod=" + rankmod,
+					url: "/rank",
+					data: {'keyword':'$keyword','rankmod':rankmod},
 					dataType: "json",
 					async: false,
 					success:function(data){
 						jQuery('#body').html('');
 						if(data != "null"){
 							for (var i = 0; i < jQuery(data).length; i++) {
-								var added = '<div class="panel panel-info item" onclick="window.open(&quot;&quot;)"><div class="panel-heading">'+data[i]["name"]+'</div><div class="panel-body item-container"><div class="mainpic-container"><img class="mainpic" src="static/img/steam.jpg"></div><div class="mainmsg-container"><div class="tags-container">';
+								var added = '<div class="panel panel-info item" onclick="window.open(&quot;&quot;)"><div class="panel-heading">'+data[i]["name"]+'</div><div class="panel-body item-container"><div class="mainpic-container"><img class="mainpic" src='+data[i]["cover"]+'></div><div class="mainmsg-container"><div class="tags-container">';
 								for (var j = 0; j < data[i]['tags'].length; j++) {
 									added += '<div class="tag">'+data[i]["tags"][j]+'</div>';
 								};
-								added +='</div><HR style="" width="80%" color="#987cb9" SIZE="10"><div class="others-container">producer:'+data[i]["producer"]+' id:'+data[i]["id"]+'</div></div><div class="price-container">&yen;56</div></div></div>'
+								added +='</div><HR style="" width="80%" color="#987cb9" SIZE="10"><div class="others-container">producer:'+data[i]["producer"]+' id:'+data[i]["id"]+'</div></div><div class="price-container">'+data[i]["price"]+'</div></div></div>'
 								jQuery('#body').append(added);
 							}
 						}
@@ -186,7 +196,7 @@ $def with(keyword,items)
 						<a class="navbar-brand" href="/" style="color:#5bc0dc">Momie<span style="font-size:25px;">@Game</span></a>
 						<form class="navbar-form navbar-left" id='input-container' action='/gamesearch' role="search">
 							<div class="form-group">
-								<input style="width:250px;border:1px solid #5bc0dc;" name='keyword' id='input' type="text" class="form-control" placeholder="Search" required="true" value= $keyword >
+								<input style="width:250px;border:1px solid #5bc0dc;" name='keyword' id='input' type="text" class="form-control" placeholder="Search" required="true" value= '$keyword' >
 							</div>
 							<div class="btn-group" role="group" aria-label="...">
 								<button type="submit" class="btn btn-info">momie</button>
@@ -215,16 +225,20 @@ $def with(keyword,items)
 			</nav>
 		</header>
 		<div id='header-helper'></div>
+
+		$if switched != 0:
+			<div id='corrector'>已经为您显示$keyword的搜索结果，仍然搜索<a href='/gamesearch?keyword=$switched&amp;ifcorrect=false'>$switched</a>&nbsp;&nbsp;&nbsp;<a style="cursor: pointer;" onclick="jQuery('#corrector').slideUp()">关闭</a></div>
+
 		<div id="sort-methods">
 			<nav aria-label="Page navigation">
 			  <ul class="pagination" id='sortlist'>
-			    <li class="active" onclick="sorterswitch(this,0)"><a>默认</a></li>
-			    <li onclick="sorterswitch(this,1)"><a>画面</a></li>
-			    <li onclick="sorterswitch(this,2)"><a>剧情</a></li>
-			    <li onclick="sorterswitch(this,3)"><a>人物</a></li>
-			    <li onclick="sorterswitch(this,4)"><a>操作</a></li>
-			    <li onclick="sorterswitch(this,5)"><a>音乐</a></li>
-			    <li onclick="sorterswitch(this,6)"><a>创意</a></li>
+			    <li class="active rankbutton" onclick="sorterswitch(this,0)"><a>默认</a></li>
+			    <li class="rankbutton" onclick="sorterswitch(this,1)"><a>画面</a></li>
+			    <li class="rankbutton" onclick="sorterswitch(this,2)"><a>剧情</a></li>
+			    <li class="rankbutton" onclick="sorterswitch(this,3)"><a>人物</a></li>
+			    <li class="rankbutton" onclick="sorterswitch(this,4)"><a>操作</a></li>
+			    <li class="rankbutton" onclick="sorterswitch(this,5)"><a>音乐</a></li>
+			    <li class="rankbutton" onclick="sorterswitch(this,6)"><a>创意</a></li>
 			  </ul>
 			</nav>
 		</div>
@@ -234,7 +248,7 @@ $def with(keyword,items)
 					<div class="panel-heading">$i['name']</div>
 					<div class="panel-body item-container">
 						<div class="mainpic-container">
-							<img class="mainpic" src="static/img/steam.jpg">
+							<img class="mainpic" src="$i['cover']">
 						</div>
 						<div class="mainmsg-container">
 							<div class="tags-container">
@@ -247,7 +261,7 @@ $def with(keyword,items)
 							</div>
 						</div>
 						<div class="price-container">
-							&yen;56
+							$i['price']
 						</div>
 					</div>
 				</div>

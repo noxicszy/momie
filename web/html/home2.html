@@ -1,3 +1,4 @@
+$def with(ifC)
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -151,7 +152,8 @@
         var word = jQuery("#searchinput").val();
         jQuery.ajax({
             type: "GET",
-            url: "/guesser?word=" + word,
+            url: "/guesser",
+            data:{'word':word},
             dataType: "json",
             async: true,
             success: function(data) {
@@ -214,10 +216,10 @@
                         <button id="mydropdown" type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Game <span class="caret"></span></button>
                         <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-labelledby="dlabel">
                             <li>
-                                <a href="#" onclick="game()">Game</a>
+                                <a href="#" id='G' onclick="game()">Game</a>
                             </li>
                             <li>
-                                <a href="#" onclick="company()">Company</a>
+                                <a href="#" id='C' onclick="company()">Company</a>
                             </li>
                         </ul>
                     </div>
@@ -235,5 +237,9 @@
         </form>
     </div>
 </body>
+$if ifC:
+    <script type="text/javascript">
+        jQuery('#C').click()
+    </script>
 
 </html>

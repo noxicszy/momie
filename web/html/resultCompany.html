@@ -1,4 +1,4 @@
-$def with(keyword,items)
+$def with(keyword,items,switched)
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -30,6 +30,11 @@ $def with(keyword,items)
 			
 			#header-helper {
 				height: 53px;
+			}
+
+			#corrector{
+				width:100%;
+				background-color: #FFFCA4;
 			}
 			
 			nav>div>div {
@@ -139,7 +144,7 @@ $def with(keyword,items)
 			
 			.price-container{
 				width:20%;
-				font-size:50px;
+				font-size:40px;
 				color:#DD4B39;
 				text-align: center;
 				border:6px solid #E5CB44;
@@ -155,7 +160,7 @@ $def with(keyword,items)
 				<div class="container-fluid">
 					<!-- Brand and toggle get grouped for better mobile display -->
 					<div class="navbar-header">
-						<a class="navbar-brand" href="/" style="color:#f0ad4c">Momie<span style="font-size:25px;">@Company</span></a>
+						<a class="navbar-brand" href="/?ifC=true" style="color:#f0ad4c">Momie<span style="font-size:25px;">@Company</span></a>
 						<form class="navbar-form navbar-left" id='input-container' action="/companysearch" role="search">
 							<div class="form-group">
 								<input style="width:250px;border:1px solid #f0ad4c;" name="keyword" id='input' type="text" class="form-control" placeholder="Search" required="true" value="$keyword">
@@ -188,13 +193,17 @@ $def with(keyword,items)
 		</header>
 
 		<div id='header-helper'></div>
+
+		$if switched != 0:
+			<div id='corrector'>已经为您显示$keyword的搜索结果，仍然搜索<a href='/companysearch?keyword=$switched&amp;ifcorrect=false'>$switched</a>&nbsp;&nbsp;&nbsp;<a style="cursor: pointer;" onclick="jQuery('#corrector').slideUp()">关闭</a></div>
+
 		<div id="body">
 			$for i in items:
 			<div class="panel panel-warning item" onclick="window.open('')">
 				<div class="panel-heading">$i['name']<span class="company">@$i['producer']</span></div>
 				<div class="panel-body item-container">
 					<div class="mainpic-container">
-						<img class="mainpic" src="static/img/steam.jpg">
+						<img class="mainpic" src="$i['cover']">
 					</div>
 					<div class="mainmsg-container">
 						<div class="tags-container">
@@ -207,7 +216,7 @@ $def with(keyword,items)
 						</div>
 					</div>
 					<div class="price-container">
-						&yen;56
+						$i['price']
 					</div>
 				</div>
 			</div>

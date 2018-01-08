@@ -138,6 +138,7 @@ class QueryCorrecter():
 
     #print ans
 correcter = QueryCorrecter()
-print correcter.correct("aur kingdm")    
+if __name__ == '__main__':
+    print correcter.correct("aurckingdm")
 
 

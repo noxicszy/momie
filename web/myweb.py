@@ -12,6 +12,7 @@ sys.path.append("..")
 from itemindex.queryguesser import *
 from itemindex.gamesearcher import *
 from webfetch.picture_query.ImageSet import *
+from itemindex.querycorrection import *
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -35,10 +36,16 @@ def gamesearcher(command,rankmod=0):
 	lresult = searcher.keywordsearch(command,rankmod)
 	res = []
 	for game in lresult:
+		if len(game.get('tags')) >= 40:
+			tags = game.get('tags')[:40].split(' ')[:-1]
+		else:
+			tags = game.get('tags').split(' ')
 		res.append({'name':game.get('name'),
 					'id':game.get('id'),
 					'producer':game.get('producer'),
-					'tags':game.get('tags').split(' ')[:min(12,len(game.get('tags').split(' ')))]
+					'tags':tags,
+					'price':game.get('price'),
+					'cover':game.get('cover')
 			})
 	return res
 
@@ -47,10 +54,16 @@ def companysearcher(command):
 	lresult = searcher.producersearch(command)
 	res = []
 	for game in lresult:
+		if len(game.get('tags')) >= 40:
+			tags = game.get('tags')[:40].split(' ')[:-1]
+		else:
+			tags = game.get('tags').split(' ')
 		res.append({'name':game.get('name'),
 					'id':game.get('id'),
 					'producer':game.get('producer'),
-					'tags':game.get('tags').split(' ')[:min(12,len(game.get('tags').split(' ')))]
+					'tags':tags,
+					'price':game.get('price'),
+					'cover':game.get('cover')
 			})
 	return res
 
@@ -78,7 +91,12 @@ def imgsearcher(filename):
 
 class home:
 	def GET(self):
-		return render.home2()
+		user_data = web.input()
+		try:
+			ifC = user_data.ifC
+			return render.home2(1)
+		except:
+			return render.home2(0)
 
 class guesser:
 	def GET(self):
@@ -92,8 +110,28 @@ class gamesearch:
 	def GET(self):
 		user_data = web.input()
 		keywords = user_data.keyword
-		res = gamesearcher(keywords)
-		return render.resultGame(keywords,res)
+		try:
+			ifcorrect = user_data.ifcorrect
+		except:
+			ifcorrect = 'true'
+
+		if ifcorrect == 'true':
+			corrected = correcter.correct(keywords)
+			if corrected == None or corrected == keywords:
+				res = gamesearcher(keywords)
+				return render.resultGame(keywords,res,0)
+			else:
+				res = gamesearcher(corrected)
+				if res == []:
+					res = gamesearcher(keywords)
+					return render.resultGame(keywords,res,0)
+				else:
+					return render.resultGame(corrected,res,keywords)
+		else:
+			res = gamesearcher(keywords)
+			return render.resultGame(keywords,res,0)
+		
+		
 
 class imgsearch:
     def POST(self):
@@ -125,8 +163,26 @@ class companysearch:
 	def GET(self):
 		user_data = web.input()
 		keywords = user_data.keyword
-		res = companysearcher(keywords)
-		return render.resultCompany(keywords,res)
+		try:
+			ifcorrect = user_data.ifcorrect
+		except:
+			ifcorrect = 'true'
+
+		if ifcorrect == 'true':
+			corrected = correcter.correct(keywords)
+			if corrected == None or corrected == keywords:
+				res = companysearcher(keywords)
+				return render.resultCompany(keywords,res,0)
+			else:
+				res = companysearcher(corrected)
+				if res == []:
+					res = companysearcher(keywords)
+					return render.resultCompany(keywords,res,0)
+				else:
+					return render.resultCompany(corrected,res,keywords)
+		else:
+			res = companysearcher(keywords)
+			return render.resultCompany(keywords,res,0)
 
 if __name__ == '__main__':
 	app = web.application(urls,globals())
