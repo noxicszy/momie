@@ -10,13 +10,15 @@ from org.apache.lucene.util import Version
 from org.apache.lucene.analysis.core import SimpleAnalyzer,WhitespaceAnalyzer
 import json
 import pickle
-
+# import sys
 
 from gameindexer import IndexFiles
 
 # lucene.initVM(vmargs=['-Djava.awt.headless=true'])
 # analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
 # indexer = IndexFiles( "index", analyzer)
+
+num = int(sys.argv[1])
 
 mod = Word2Vec.load(r'../datastore/nlp_vector/Word60.model')
 KeyWords = ["画面","剧情","人物","操作","音乐","创意"]
@@ -33,10 +35,12 @@ with open("sentiment_score.txt","r") as f:
 root = "../datastore/duple_words"
 count = 0
 data = []
-datadir = "../datastore/vector_info"
+datadir = "../datastore/vector_info/{}".format(num)
 for root, dirnames, filenames in os.walk(root):
     for filename in filenames:
         if not filename.endswith('.json') and not filename.endswith('.JSON'):
+            continue
+        if (int(filename.split(".")[0])%100)/10!=num:
             continue
         path = os.path.join(root, filename)
         contents = None

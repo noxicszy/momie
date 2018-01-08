@@ -9,6 +9,8 @@ from org.apache.lucene.analysis.core import WhitespaceAnalyzer
 from org.apache.lucene.index import Term
 from org.apache.lucene.index import \
     IndexWriterConfig, IndexWriter, DirectoryReader
+import string
+import pickle
 
 if __name__ == '__main__':
     lucene.initVM(vmargs=['-Djava.awt.headless=true'])
@@ -27,7 +29,7 @@ ft.setStoreTermVectorOffsets(True)
 ft.setStoreTermVectorPositions(True)
 
 countlines = 0
-with open("nameguess.txt","r") as f:
+with open("nameguess1.txt","r") as f:
     for line in f.readlines():
         doc = Document()
         doc.add(Field("words", line, ft))
@@ -39,7 +41,8 @@ iwriter.close()
 
 ireader = DirectoryReader.open(directory)
 
-with open("filtedguess.txt","w") as f:
+with open("filtedguess.pkl","wb") as f:
+    content = []
     for docnum in xrange(0, countlines):
         doc = ireader.document(docnum)
         words = doc.get("words")
@@ -47,7 +50,16 @@ with open("filtedguess.txt","w") as f:
         filtedwords = []
         for word in words.split():
             #print word
-            if ireader.docFreq(Term("words",word))<=2:
-                print word
+            if ireader.docFreq(Term("words",word))<=5 and word[0]not in string.letters:
+                #print word
                 filtedwords.append(word.encode("utf8"))
-        f.write(" ".join(filtedwords)+"\n")
+        if len(filtedwords)>1:
+            # f.write(" ".join(filtedwords)+"\n")
+            if filtedwords[0].isdigit:
+                try:
+                    content.append((int(filtedwords[0])," ".join(filtedwords[1:])))
+                except:
+                    print filtedwords
+            else :
+                print filtedwords
+    pickle.dump(content,f)

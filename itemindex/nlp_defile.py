@@ -22,36 +22,44 @@ ccomp(解密-7, 好玩-11)
 nsubj(risen-8, Empire-2) 原文：升阳帝国东方崛起
 nmod(Seas-3, Command-1)
 
-dep(行-37, 709174-36)
+dep(行-2, 388070-1)
 """
 import re
 import json
-FIL = "parsedtext.txt"
+FILdir = "../datastore/nlp_raw"
 stordir = "../datastore/duple_words"
-with open(FIL,"r")as f:
-    gameid = None
-    data = {"nsubj":[],"amod":[],"dobj":[]}
-    for line in f.readlines():
-        line = line.strip()
-        print line.decode("utf8")
-        if line.split("-")[0]=='dep(行': 
-            newid = re.findall(r", (\d+)-",line)
-            if not len(newid):
-                continue
-            if gameid :
-                with open(os.path.join(stordir,"{}.json").format(gameid),"w")as out:
-                    json.dump(data,out,ensure_ascii=False)
-            gameid = int(newid[0])
+for root, dirnames, filenames in os.walk(FILdir):
+    for FIL in filenames:
+        path = os.path.join(FILdir,FIL)
+        with open(path,"r")as f:
+            gameid = None
             data = {"nsubj":[],"amod":[],"dobj":[]}
-        elif line.split("(")[0]=="nsubj":
-            # print re.findall(r"\((.+?)-",line)
-            # print re.findall(r"\((.+?)-",line)[0]
-            data["nsubj"].append((re.findall(r", (.+)-",line)[0],re.findall(r"\((.+?)-",line)[0]))
-        elif line.split("(")[0]=="amod" :
-            data["amod"].append((re.findall(r"\((.+?)-",line)[0],re.findall(r", (.+?)-",line)[0]))
-        elif line.split("(")[0]=="dobj" :
-            data["dobj"].append((re.findall(r"\((.+?)-",line)[0],re.findall(r", (.+?)-",line)[0]))
-    with open(os.path.join(stordir,"{}.json").format(gameid),"w")as out:
+            for line in f.readlines():
+                line = line.strip()
+                #print line.decode("utf8")
+                if line.split(",")[0]=='dep(行-2': 
+                    newid = re.findall(r", (\d+)-",line)
+                    if not len(newid):
+                        continue
+                    if gameid :
+                        with open(os.path.join(stordir,"{}.json").format(gameid),"w")as out:
+                            json.dump(data,out,ensure_ascii=False)
+                        print gameid
+                        assert gameid !=1
+                    gameid = int(newid[0])
+                    if gameid ==1:
+                        print line
+                        assert False
+                    data = {"nsubj":[],"amod":[],"dobj":[]}
+                elif line.split("(")[0]=="nsubj":
+                    # print re.findall(r"\((.+?)-",line)
+                    # print re.findall(r"\((.+?)-",line)[0]
+                    data["nsubj"].append((re.findall(r", (.+)-",line)[0],re.findall(r"\((.+?)-",line)[0]))
+                elif line.split("(")[0]=="amod" :
+                    data["amod"].append((re.findall(r"\((.+?)-",line)[0],re.findall(r", (.+?)-",line)[0]))
+                elif line.split("(")[0]=="dobj" :
+                    data["dobj"].append((re.findall(r"\((.+?)-",line)[0],re.findall(r", (.+?)-",line)[0]))
+            with open(os.path.join(stordir,"{}.json").format(gameid),"w")as out:
                 json.dump(data,out,ensure_ascii=False)
 
             

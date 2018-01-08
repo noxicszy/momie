@@ -210,7 +210,7 @@ class IndexFiles(object):
             writer.close()
     #TODO：增加update 在已有条目的基础上添加新field
     
-    def updatedoc(self,appid,updates,mod = "add",writer = None):
+    def updatedoc(self,appid,updates,mod = "add",writer = None,searcher = None):
         #the format of the updates:
         #[(field 1,value 1),().....]
         opened = False
@@ -219,8 +219,8 @@ class IndexFiles(object):
             config = IndexWriterConfig(Version.LUCENE_CURRENT, analyzer)
             config.setOpenMode(IndexWriterConfig.OpenMode.APPEND)
             writer = IndexWriter(self.store, config)
-
-        searcher = IndexSearcher(DirectoryReader.open(self.store))
+        if searcher ==None:
+            searcher = IndexSearcher(DirectoryReader.open(self.store))
 
         query = NumericRangeQuery.newIntRange("id", appid, appid, True, True)
         scoreDocs = searcher.search(query, 50).scoreDocs
@@ -248,7 +248,7 @@ class IndexFiles(object):
         if opened:
             writer.commit()
             writer.close()
-    
+
     
 
 if __name__ == '__main__':
@@ -278,7 +278,7 @@ if __name__ == '__main__':
         """
         analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
         indexer = IndexFiles( "index", analyzer)
-        #indexer.indexDocs('../datastore/json_info',"create")### to make a new index, use create
+        indexer.indexDocs('../datastore/json_info',"create")### to make a new index, use create
         # docvalue = ("name","besiege") #不用提供整个名称     “besiege 围攻”是删不掉的
         # indexer.deletedoc(docvalue)
         #indexer.updatedoc(446640,[("vector","11111111")])
