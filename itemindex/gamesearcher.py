@@ -18,6 +18,7 @@ from org.apache.lucene.search import IndexSearcher
 from org.apache.lucene.search import NumericRangeQuery
 from org.apache.lucene.util import Version
 import string
+import json
 
 """
 This script is loosely based on the Lucene (java implementation) demo class 
@@ -112,15 +113,49 @@ class GameSearcher:
         scoreDocs = self.searcher.search(query, 20).scoreDocs
         if not scoreDocs:
             return None
-        return self.searcher.doc(scoreDocs[0].doc)
+        res = {}
+        doc = self.searcher.doc(scoreDocs[0].doc)
+        res["id"] = doc.get("id")
+        res["cover"]    =   doc.get("cover")
+        res["name"] =   doc.get("name")
+        res["names"]    =   doc.get("names")
+        res["tags"] =   doc.get("tags")
+        res["producer"] = doc.get("producer")
+        res["price"]  =   doc.get("price")
+        # print type(doc.get("urls"))
+        res["related"]  =   doc.get("related").split()
+        vector = []
+        for i in doc.get("vector")[1:-1].split(","):
+            vector.append(float(i))
+        assert len(vector) == 6
+        res["vector"] = vector
+        root  = os.path.join("../datastore/steam_reviews",str(ID))
+        try:
+            reviews = []
+            for f in os.listdir(root):
+                with open(os.path.join(root,f),"r") as ff:
+                    content = json.load(ff)
+                    for i in content.get("reviews",[]):         
+                        reviews.append(i)
+            #print reviews
+            res["review"] = reviews #这样的review具有标点符号和用户信息
+        except :
+            pass
+        root = os.path.join("../datastore/json_info/",str(ID)+".json")
+        with open(root,"r") as ff:
+            content = json.load(ff)
+            res["description"]  = content.get("description")
+            res["urls"] = content.get("urls")
+        
+        return res
 
 
 vm_env=lucene.initVM(vmargs=['-Djava.awt.headless=true'])
 searcher = GameSearcher(vm_env)
 if __name__ == '__main__':
     
-    if False:
-    # if True:
+    # if False:
+    if True:
         while True:
             for i in searcher.keywordsearch(raw_input(),1):#.decode("utf8")):
                 print i.get("id"),i.get("name"),i.get("vector")
@@ -133,6 +168,10 @@ if __name__ == '__main__':
             print d.get("related")
             print d.get("vector")
             print d.get("names")
+            # print type(d.get("urls"))
+            # print type(d.get("related"))
+            # print type(d.get("vector"))
+           # print d.get("review")
         while True:
             d = searcher.idget(int(raw_input()))
             if d:
@@ -141,6 +180,8 @@ if __name__ == '__main__':
                 print d.get("related")
                 print d.get("vector")
                 print d.get("names")
+                #print d.get("review")
+                
     else:
         # ds = searcher.keywordsearch("Wolf Gang")
         ds = searcher.producersearch("arts")

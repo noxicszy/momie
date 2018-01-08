@@ -84,7 +84,7 @@ def changes_steamreviews():
 
 # for chan in changes_similargames():
 #     indexer.updatedoc(chan[0],chan[1],mod = "add",writer = writer,searcher = searcher)
-#     print chan[0],chan[1]
+    # print chan[0],chan[1]
 
 # for chan in changes_name():
 #     indexer.updatedoc(chan[0],chan[1],mod = "add",writer = writer,searcher = searcher)
