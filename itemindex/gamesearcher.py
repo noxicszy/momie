@@ -99,7 +99,7 @@ class GameSearcher:
                 vector = info[i].get("vector")
                 if vector:
                     vector = vector[1:-1].split(",")
-                    print rank[i],vector[rankmod-1]
+                    #print rank[i],vector[rankmod-1]
                     rank[i]+=float(vector[rankmod-1])*1000
         
         ran = sorted(rank.items(),key = lambda x :x[1],reverse=True)
