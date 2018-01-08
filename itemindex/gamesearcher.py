@@ -110,6 +110,8 @@ class GameSearcher:
     def idget(self,ID):
         query = NumericRangeQuery.newIntRange("id", ID, ID, True, True)
         scoreDocs = self.searcher.search(query, 20).scoreDocs
+        if not scoreDocs:
+            return None
         return self.searcher.doc(scoreDocs[0].doc)
 
 #STORE_DIR = "index"
@@ -120,15 +122,30 @@ searcher = GameSearcher(vm_env)
 
 if __name__ == '__main__':
     
-    # if False:
-    if True:
+    if False:
+    # if True:
         while True:
             for i in searcher.keywordsearch(raw_input(),1):#.decode("utf8")):
                 print i.get("id"),i.get("name"),i.get("vector")
                 pass
+    elif True:
+        d = searcher.idget(10)
+        if d:
+            print d.get("id"),d.get("name"),d.get("urls"),d.get("producer")
+            print d.get("price"),d.get("description")
+            print d.get("related")
+            print d.get("vector")
+            print d.get("names")
+        while True:
+            d = searcher.idget(int(raw_input()))
+            if d:
+                print d.get("id"),d.get("name"),d.get("urls"),d.get("producer")
+                print d.get("price"),d.get("description")
+                print d.get("related")
+                print d.get("vector")
+                print d.get("names")
     else:
-        # d = searcher.idget(503430)
-        # d = searcher.keywordsearch("Wolf Gang")[0]
+        # ds = searcher.keywordsearch("Wolf Gang")
         ds = searcher.producersearch("arts")
         for d in ds:
             print d.get("id"),d.get("name")
