@@ -76,6 +76,21 @@
         width: 110px;
         height: 40px;
         font-size: 20px;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    #img-upload{
+        position:fixed;
+        z-index: 2;
+        top:10px;
+        left:50px;
+    }
+    
+    #imgselectbtn{
+        font-size:18.4px;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
     }
     </style>
     <script>
@@ -99,7 +114,7 @@
 
     function company() {
         var form = document.getElementById('input-container');
-        form.action = '';
+        form.action = '/companysearch';
         var btn = document.getElementById('mydropdown');
         btn.innerHTML = "Company ";
         var caret = document.createElement('span');
@@ -115,13 +130,28 @@
         body.style.backgroundColor = "#ffcc33"
     }
     </script>
+    <!-- position of img button -->
+    <script type="text/javascript">
+        jQuery(function(){
+            var mydiv=jQuery("#img-upload");
+            var mydiv_move=function(){
+            jQuery(mydiv).css("top",jQuery('#momie').offset().top);
+            jQuery(mydiv).css("left",jQuery('#momie').offset().left+jQuery('#momie').width()+26);
+            jQuery('#imgselectbtn').css("height",jQuery('#momie').height()+14);
+            };
+            mydiv_move();
+            jQuery(window).resize(function(){
+            mydiv_move();
+            });
+        });
+    </script>
     <!-- the guesser -->
     <script type="text/ecmascript">
     function txtchange() {
         var word = jQuery("#searchinput").val();
         jQuery.ajax({
             type: "GET",
-            url: "/gs?word=" + word,
+            url: "/guesser?word=" + word,
             dataType: "json",
             async: true,
             success: function(data) {
@@ -198,6 +228,10 @@
                 <ul class="listgroup" id='guessresults'></ul>
             </div>
             <button type="submit" class="btn btn-primary" id="momie">momie</button>
+        </form>
+        <form id="img-upload" action="/imgsearch" method="post" enctype="multipart/form-data" name="imgUploadForm">
+            <input type="file" id="imageinput" name="img" accept="image/jpeg,image/jpg,image/png,image/gif," style="display: none;" onchange="document.getElementById('img-upload').submit()"/>
+            <button type="button" class="btn btn-primary" id="imgselectbtn" onclick="document.getElementById('imageinput').click()"><span class="glyphicon glyphicon-picture"></span></button>
         </form>
     </div>
 </body>

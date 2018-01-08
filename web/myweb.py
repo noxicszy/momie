@@ -11,23 +11,28 @@ import re
 sys.path.append("..")
 from itemindex.queryguesser import *
 from itemindex.gamesearcher import *
-from webfetch.picture_query.ImageSet import imageSet
+from webfetch.picture_query.ImageSet import *
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+#load guesser
+Guesser = QueryGuesser()
+
 urls = (
 	'/', 'home',
-	'/gs', 'guesser',
+	'/guesser', 'guesser',
 	'/gamesearch','gamesearch',
-	'/imgsearch','imgsearch'
+	'/imgsearch','imgsearch',
+	'/rank','gamerank',
+	'/companysearch','companysearch',
 )
 
 render = web.template.render('html')
 
-def gamesearcher(command):
+def gamesearcher(command,rankmod=0):
 	vm_env.attachCurrentThread()
-	lresult = searcher.keywordsearch(command)
+	lresult = searcher.keywordsearch(command,rankmod)
 	res = []
 	for game in lresult:
 		res.append({'name':game.get('name'),
@@ -37,6 +42,20 @@ def gamesearcher(command):
 			})
 	return res
 
+def companysearcher(command):
+	vm_env.attachCurrentThread()
+	lresult = searcher.producersearch(command)
+	res = []
+	for game in lresult:
+		res.append({'name':game.get('name'),
+					'id':game.get('id'),
+					'producer':game.get('producer'),
+					'tags':game.get('tags').split(' ')[:min(12,len(game.get('tags').split(' ')))]
+			})
+	return res
+
+
+#get id by imgurl
 def getID(store_url):
     m = re.search("apps+/(\d+)/*", store_url)
     return str(m.group(1))
@@ -65,9 +84,8 @@ class guesser:
 	def GET(self):
 		user_data = web.input()
 		guessed = user_data.word
-		resultlist = QueryGuesser().guess(guessed.decode("utf8"))
+		resultlist = Guesser.guess(guessed.decode("utf8"))
 		l = min(6,len(resultlist))
-		print json.dumps(resultlist[:l])
 		return json.dumps(resultlist[:l])
 
 class gamesearch:
@@ -86,14 +104,29 @@ class imgsearch:
         safeImageExts =('.png','.jpeg','.jpg','.gif')
         if not ext in safeImageExts:
             return 'file type error'
-        #保存文件
+        #保存文件到服务器
         fout = open(filename,'wb')
         fout.write(user_data.img.file.read())
         fout.close()
         res = imgsearcher(filename)
+        #从服务器删除文件
         os.remove(filename)
         return render.resultImg(res)
         
+class gamerank:
+	def GET(self):
+		user_data = web.input()
+		keywords = user_data.keyword
+		rankmod = int(user_data.rankmod)
+		res = gamesearcher(keywords,rankmod)
+		return json.dumps(res)
+
+class companysearch:
+	def GET(self):
+		user_data = web.input()
+		keywords = user_data.keyword
+		res = companysearcher(keywords)
+		return render.resultCompany(keywords,res)
 
 if __name__ == '__main__':
 	app = web.application(urls,globals())

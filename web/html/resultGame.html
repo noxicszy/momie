@@ -150,10 +150,29 @@ $def with(keyword,items)
 				
 			}
 		</style>
-		<script>
-			function sorterswitch(obj){
+		<script type="text/ecmascript">
+			function sorterswitch(obj,rankmod){
 				jQuery(obj).addClass('active');
 				jQuery(obj).siblings('.active').removeClass('active');
+				jQuery.ajax({
+					type: "GET",
+					url: "/rank?keyword=" + $keyword + "&amp;rankmod=" + rankmod,
+					dataType: "json",
+					async: false,
+					success:function(data){
+						jQuery('#body').html('');
+						if(data != "null"){
+							for (var i = 0; i < jQuery(data).length; i++) {
+								var added = '<div class="panel panel-info item" onclick="window.open(&quot;&quot;)"><div class="panel-heading">'+data[i]["name"]+'</div><div class="panel-body item-container"><div class="mainpic-container"><img class="mainpic" src="static/img/steam.jpg"></div><div class="mainmsg-container"><div class="tags-container">';
+								for (var j = 0; j < data[i]['tags'].length; j++) {
+									added += '<div class="tag">'+data[i]["tags"][j]+'</div>';
+								};
+								added +='</div><HR style="" width="80%" color="#987cb9" SIZE="10"><div class="others-container">producer:'+data[i]["producer"]+' id:'+data[i]["id"]+'</div></div><div class="price-container">&yen;56</div></div></div>'
+								jQuery('#body').append(added);
+							}
+						}
+					}
+				});
 			}
 		</script>
 	</head>
@@ -164,21 +183,21 @@ $def with(keyword,items)
 				<div class="container-fluid">
 					<!-- Brand and toggle get grouped for better mobile display -->
 					<div class="navbar-header">
-						<a class="navbar-brand" href="#" style="color:#5bc0dc">Momie<span style="font-size:25px;">@Game</span></a>
+						<a class="navbar-brand" href="/" style="color:#5bc0dc">Momie<span style="font-size:25px;">@Game</span></a>
 						<form class="navbar-form navbar-left" id='input-container' action='/gamesearch' role="search">
 							<div class="form-group">
 								<input style="width:250px;border:1px solid #5bc0dc;" name='keyword' id='input' type="text" class="form-control" placeholder="Search" required="true" value= $keyword >
 							</div>
 							<div class="btn-group" role="group" aria-label="...">
-								<script>
-									function switchmomie(){
-										var keyword=jQuery('#input').val();
-										window.location.href = '/?keyword='+keyword;
-									}
-								</script>
 								<button type="submit" class="btn btn-info">momie</button>
 								<button type="button" class="btn btn-warning" onclick="switchmomie()">Switch to momie@Company</button>
 							</div>
+							<script>
+								function switchmomie(){
+									var keyword=jQuery('#input').val();
+									window.location.href = '/companysearch?keyword='+keyword;
+								}
+							</script>
 						</form>
 					</div>
 
@@ -199,13 +218,13 @@ $def with(keyword,items)
 		<div id="sort-methods">
 			<nav aria-label="Page navigation">
 			  <ul class="pagination" id='sortlist'>
-			    <li class="active" onclick="sorterswitch(this)"><a href="#">默认</a></li>
-			    <li onclick="sorterswitch(this)"><a href="#">画面</a></li>
-			    <li onclick="sorterswitch(this)"><a href="#">音乐</a></li>
-			    <li onclick="sorterswitch(this)"><a href="#">剧情</a></li>
-			    <li onclick="sorterswitch(this)"><a href="#">人物</a></li>
-			    <li onclick="sorterswitch(this)"><a href="#">创意</a></li>
-			    <li onclick="sorterswitch(this)"><a href="#">操作</a></li>
+			    <li class="active" onclick="sorterswitch(this,0)"><a>默认</a></li>
+			    <li onclick="sorterswitch(this,1)"><a>画面</a></li>
+			    <li onclick="sorterswitch(this,2)"><a>剧情</a></li>
+			    <li onclick="sorterswitch(this,3)"><a>人物</a></li>
+			    <li onclick="sorterswitch(this,4)"><a>操作</a></li>
+			    <li onclick="sorterswitch(this,5)"><a>音乐</a></li>
+			    <li onclick="sorterswitch(this,6)"><a>创意</a></li>
 			  </ul>
 			</nav>
 		</div>
@@ -222,7 +241,7 @@ $def with(keyword,items)
 								$for tag in i['tags']:
 									<div class="tag">$tag</div>
 							</div>
-							<HR style="" width="80%" color=#987cb9 SIZE=10>
+							<HR style="" width="80%" color="#987cb9" SIZE="10">
 							<div class="others-container">
 								producer:$i['producer'] id:$i['id']
 							</div>
