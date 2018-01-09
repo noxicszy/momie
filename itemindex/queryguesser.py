@@ -53,8 +53,9 @@ class QueryGuesser():
         ireader = DirectoryReader.open(directory)
         for docnum in xrange(0, ireader.numDocs()):
             doc = ireader.document(docnum)
-            name = doc.get("name")
-            self.possibits.append(self.modify(name))
+            names = doc.get("name")
+            for name in names.split("\t"):
+                self.possibits.append(self.modify(name))
         self.possibits.sort(cmp=self.comp)
         print self.possibits
         with open(self.stordir,"wb") as f:

@@ -46,6 +46,11 @@ class GameSearcher:
             "tags":3,
             "description":1,
             "review":0.8
+            # "name":0,
+            # "names":0,
+            # "tags":0,
+            # "description":1,
+            # "review":0.8
         }
     
     def namemodifier(self,name):
@@ -157,11 +162,11 @@ if __name__ == '__main__':
     # if False:
     if True:
         while True:
-            for i in searcher.keywordsearch(raw_input(),1):#.decode("utf8")):
-                print i.get("id"),i.get("name"),i.get("vector")
+            for i in searcher.keywordsearch(raw_input(),0):#.decode("utf8")):
+                print i.get("id"),i.get("name")#,i.get("vector")
                 pass
     elif True:
-        d = searcher.idget(10)
+        d = searcher.idget(240720)
         if d:
             print d.get("id"),d.get("name"),d.get("urls"),d.get("producer")
             print d.get("price"),d.get("description")
@@ -171,7 +176,8 @@ if __name__ == '__main__':
             # print type(d.get("urls"))
             # print type(d.get("related"))
             # print type(d.get("vector"))
-           # print d.get("review")
+            # for a in d.get("review"):
+            #     print a["review"]
         while True:
             d = searcher.idget(int(raw_input()))
             if d:

@@ -235,7 +235,7 @@ class IndexFiles(object):
             if mod=="add" and key!="vector" and key!="id":
                 old = doc.get(key)
                 if  old:
-                    value += " "+doc.get(key)
+                    value += "\t"+doc.get(key)
             doc.removeField(key)
             doc.add(Field(key,value, self.getfieldType(key))) 
             # java.lang.IllegalArgumentException: can only update NUMERIC or BINARY fields! field=name 内置updates不好用

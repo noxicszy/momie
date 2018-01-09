@@ -45,10 +45,11 @@ class QueryCorrecter():
             self.buckets.append(["" for i in range(2**13)])
         for docnum in xrange(0, ireader.numDocs()):
             doc = ireader.document(docnum)
-            name = doc.get("name")
-            for i in range(len(self.keys)):
-                pos = self.calvec(name,self.keys[i])
-                self.buckets[i][pos] = self.buckets[i][pos]+name+'\t'
+            names = doc.get("name")
+            for name in names.split("\t"):
+                for i in range(len(self.keys)):
+                    pos = self.calvec(name,self.keys[i])
+                    self.buckets[i][pos] = self.buckets[i][pos]+name+'\t'
         with open(self.stordir,"wb") as f:
             pickle.dump(self.buckets,f)
         
