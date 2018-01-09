@@ -41,16 +41,20 @@ class GameSearcher:
         self.searcher = IndexSearcher(DirectoryReader.open(self.directory))
         self.analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
         self.weights = {
-            "name":10,
-            "names":5,
-            "tags":3,
-            "description":1,
-            "review":0.8
-            # "name":0,
-            # "names":0,
-            # "tags":0,
-            # "description":1,
-            # "review":0.8
+            "title":{
+                "name":10,
+                "names":5,
+                "tags":3,
+                "description":1,
+                "review":0.8
+            },
+            "content":{
+                "name":0,
+                "names":0,
+                "tags":0,
+                "description":1,
+                "review":0.8
+            }
         }
     
     def namemodifier(self,name):
@@ -70,7 +74,7 @@ class GameSearcher:
         return res
 
 
-    def keywordsearch(self,command,rankmod=0):
+    def keywordsearch(self,command,rankmod=0,searchmod="title"):
         """
         rankmod 可以是可以改变的优先级排序，比如可以是“画质”，“剧情”，“人设”，“打击感”等等
         KeyWords = ["画面","剧情","人物","操作","音乐","创意"] 用1,2,3,4,5，6表示 0表示默认排序
@@ -91,12 +95,12 @@ class GameSearcher:
             info[docid] = self.searcher.doc(scoreDoc.doc)
         
         command = " ".join(jieba.cut(command))
-        for field in self.weights.keys():
+        for field in self.weights[searchmod].keys():
             query = QueryParser(Version.LUCENE_CURRENT, field,self.analyzer).parse(command)
             scoreDocs = self.searcher.search(query, 20).scoreDocs
             for scoreDoc in scoreDocs:
                 docid = self.searcher.doc(scoreDoc.doc).get("id")
-                rank[docid] = rank.get(docid,0)+scoreDoc.score*self.weights[field]
+                rank[docid] = rank.get(docid,0)+scoreDoc.score*self.weights[searchmod][field]
                 info[docid] = self.searcher.doc(scoreDoc.doc)
         
         if rankmod:
