@@ -1,0 +1,354 @@
+$def with(game)
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+		<title>momie game item</title>
+
+		<!-- Bootstrap -->
+		<link href="static/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+		<script src="static/js/jquery.min.js"></script>
+		<!-- Include all compiled plugins (below), or include individual files as needed -->
+		<script src="static/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+		<style>
+			header {
+				position: fixed;
+				top: 0px;
+				right: 0px;
+				left: 0px;
+				z-index: 2;
+			}
+			
+			#header-helper {
+				height: 53px;
+			}
+			
+			#itemheader {
+				background-color: #60CBE9;
+				padding-left: 200px;
+				padding-top: 30px;
+				padding-bottom: 30px;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: flex-start;
+			}
+			
+			#name {
+				font-size: 80px;
+				font-family: "microsoft yahei";
+				color: whitesmoke;
+				margin-bottom: -10px;
+				margin-top: -10px;
+			}
+			
+			#description {
+				font-size: 25px;
+				font-family: "microsoft yahei";
+				color: whitesmoke;
+			}
+			
+			#vector {
+				font-size: 20px;
+				font-family: "microsoft yahei";
+				color: whitesmoke;
+			}
+			
+			#secondfloor {
+				display: flex;
+				flex-direction: row;
+				align-items: stretch;
+			}
+			
+			#img-carousel {
+				width: 56%;
+				margin:10px;
+				height:500px;
+			}
+			
+			#img-carousel div{
+
+				height:100%;
+			}
+
+			#img-carousel img {
+				height: 100%;
+				max-width: 100%;
+			}
+			
+			#msgcontainer {
+				width: 44%;
+				padding: 0;
+				margin: 0;
+
+			}
+			
+			#cover {
+				width: 100%;
+			}
+			
+			#undercover1 {
+				display: flex;
+				flex-direction: row;
+				align-items: stretch;
+				border-bottom: 2px solid antiquewhite;
+			}
+			
+			#u1left {
+				height: 80px;
+				width: 70%;
+				color: whitesmoke;
+				background-color: #60CBE9;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
+			
+			#producer,
+			#id {
+				height: 50%;
+				font-size: 20px;
+				text-align: center;
+				padding-top: 5px;
+				font-family: "microsoft yahei";
+			}
+			
+			#u1right {
+				background-color: whitesmoke;
+				width: 30%;
+				display: flex;
+				flex-direction: column;
+				align-content: center;
+				justify-content: center;
+			}
+			
+			#price {
+				font-size: 37px;
+				color: #DD4B39;
+				text-align: center;
+			}
+			
+			#undercover2 {
+				display: flex;
+				flex-direction: row;
+				align-items: stretch;
+				border-bottom: 2px solid antiquewhite;
+			}
+			
+			#u2left{
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-content: center;
+				width: 10%;
+				background-color: #60CBE9;
+			}
+			
+			#tag-title {
+				font-size: 22px;
+				font-family: "microsoft yahei";
+				text-align: center;
+				color: whitesmoke;
+			}
+			
+			#tags-container {
+				width: 90%;
+				background-color: whitesmoke;
+				padding: 8px;
+				display: flex;
+				flex-direction: row;
+				justify-content: center;
+				flex-wrap: wrap;
+			}
+			
+			.tag {
+				border-radius: 17px;
+				margin: 4px;
+				padding-left: 7px;
+				padding-right: 7px;
+				height: 30px;
+				line-height: 30px;
+				text-align: center;
+				background-color: #A6E1EC;
+				font-size: 15px;
+				color: #985F0D;
+				font-family: "microsoft sans serif";
+				margin-right: 5px;
+			}
+			
+			#thirdfloor {
+				display: flex;
+				flex-direction: row;
+				align-items: flex-start;
+			}
+			
+			#reviews-container {
+				width: 70%;
+				margin: 10px;
+			}
+			
+			.review {
+				font-size: larger;
+				color: #222222;
+				font-family: "microsoft yahei";
+				border-color: #60CBE9;
+			}
+			
+			#related-container {
+				margin:10px;
+				width: 30%;
+				background-color: whitesmoke;
+			}
+			
+			.relatedname{
+				margin: 10px;
+			}
+		</style>
+		<!-- <script type="text/javascript">
+			jQuery(function() {
+				var carouselheight = function() {
+					jQuery('#img-carousel').css("height", jQuery('#msgcontainer').height()-20);
+				};
+				carouselheight();
+				jQuery(window).resize(function() {
+					carouselheight();
+				});
+			});
+		</script> -->
+	</head>
+
+	<body>
+		<header>
+			<nav id="appbar" class="navbar navbar-default">
+				<div class="container-fluid">
+					<!-- Brand and toggle get grouped for better mobile display -->
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+		        <span class="sr-only">Toggle navigation</span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		      </button>
+						<a class="navbar-brand" href="/" style="color:#5bc0dc">Momie<span style="font-size:25px;">@Game</span></a>
+						<form class="navbar-form navbar-left" id='input-container' action='/gamesearch' role="search">
+							<div class="form-group">
+								<input style="width:250px;border:1px solid #5bc0dc;" name='keyword' id='input' type="text" class="form-control" placeholder="Search" required="true" value="haha">
+							</div>
+							<div class="btn-group" role="group" aria-label="...">
+								<button type="submit" class="btn btn-info"">momie</button>
+								<button type="button" class="btn btn-warning" onclick="switchmomie()">Switch to momie@Company</button>
+							</div>
+							<script>
+								function switchmomie(){
+									var keyword=jQuery('#input').val();
+									window.location.href = '/companysearch?keyword='+keyword;
+								}
+							</script>
+						</form>
+					</div>
+
+					<div>
+						<ul class="nav navbar-nav navbar-right">
+							<li>
+								<a href="#" style="font-size:large">About</a>
+							</li>
+						</ul>
+					</div>
+					<!-- /.navbar-collapse -->
+				</div>
+				<!-- /.container-fluid -->
+			</nav>
+		</header>
+		<div id='header-helper'></div>
+		<div id='itemheader'>
+			<div id='name'>$game['name']</div>
+			<div id='description'>$game['description']</div>
+			<HR style="margin-left: 0px;" width="40%" color=#987cb9 SIZE=10>
+			<div id='vector'>画面:$game['vector'][0]&nbsp;&nbsp;剧情:$game['vector'][1]&nbsp;&nbsp;人物:$game['vector'][2]&nbsp;&nbsp;操作:$game['vector'][3]&nbsp;&nbsp;剧情:$game['vector'][4]&nbsp;&nbsp;创意:$game['vector'][5]</div>
+		</div>
+		<div id='secondfloor'>
+			<div id="img-carousel" class="carousel slide" data-ride="carousel">
+				<!-- Indicators -->
+				<ol class="carousel-indicators">
+					<li data-target="#img-carousel" data-slide-to="0" class="active"></li>
+					$for i in game['urls']:
+						<li data-target="#img-carousel" data-slide-to="$loop.index"></li>
+				</ol>
+
+				<!-- Wrapper for slides -->
+				<div class="carousel-inner" role="listbox">
+					<div class="item active">
+						<img class="img-responsive center-block" src="$game['urls'][0]" alt="...">
+					</div>
+					$for i in game['urls']:
+						<div class="item">
+							<img class="img-responsive center-block" src="$i" alt="...">
+						</div>
+				</div>
+
+				<a class="left carousel-control" href="#img-carousel" role="button" data-slide="prev">
+					<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+					<span class="sr-only">Previous</span>
+				</a>
+				<a class="right carousel-control" href="#img-carousel" role="button" data-slide="next">
+					<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+					<span class="sr-only">Next</span>
+				</a>
+			</div>
+			<!--</div>-->
+			<div id='msgcontainer'>
+				<img id='cover' src="$game['cover']">
+				<div id='undercover1'>
+					<div id='u1left'>
+						<div id='producer'>开发商:$game['producer']</div>
+						<HR style="margin:0px;width:60%" color=#987cb9>
+						<div id='id'>steam链接:<a href="http://store.steampowered.com/app/$game['id']">http://store.steampowered.com/app/$game['id']</a></div>
+					</div>
+					<div id='u1right'>
+						<div id='price'>$game['price']</div>
+					</div>
+				</div>
+				<div id='undercover2'>
+					<div id="u2left">
+						<div id='tag-title'>标 签</div>
+					</div>
+					<div id='tags-container'>
+						$for tag in game['tags']:
+							<div class="tag">$tag</div>
+					</div>
+				</div>
+				<div id='names'>
+
+				</div>
+			</div>
+		</div>
+		<div id='thirdfloor'>
+			<div class='panel panel-info' id='reviews-container'>
+				<div class='panel-heading' style="font-size: 20px;color: whitesmoke;background-color: #60CBE9;font-family:'microsoft yahei'">评论</div>
+				<div class='panel-body'>
+				$for review in game['rev']:
+					<blockquote class='review'>
+					  <p>$review['review-content']</p>
+					  <footer>$review['authorid'] <cite title='Source Title'> playtime-forever:$(review['playtime'])h</cite></footer>
+					</blockquote>
+				</div>
+			</div>
+			<div class='list-group' id='related-container'>
+			  	<a class="list-group-item" style="font-size:20px;font-family: 'microsoft yahei';background-color: #60CBE9;color:whitesmoke">相关游戏</a>
+			  	$for related in game['rel']:
+					<a href="/item?id=$related['id']" class="list-group-item related"><h3 class='relatedname'>$related['name']</h4>
+						<div id='tags-container' style='background-color: inherit;justify-content: flex-start;'>
+							$for tag in related['tags']:
+								<div class="tag">$tag</div>
+						</div>
+					</a>
+			</div>
+		</div>
+	</body>
+
+</html>

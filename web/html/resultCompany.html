@@ -152,6 +152,11 @@ $def with(keyword,items,switched)
 				
 			}
 		</style>
+		<script type="text/javascript">
+			function openitem(id){
+				window.location.href = '/item?id='+id;
+			}
+		</script>
 	</head>
 
 	<body>
@@ -199,7 +204,7 @@ $def with(keyword,items,switched)
 
 		<div id="body">
 			$for i in items:
-			<div class="panel panel-warning item" onclick="window.open('')">
+			<div class="panel panel-warning item" onclick="openitem($i['id'])">
 				<div class="panel-heading">$i['name']<span class="company">@$i['producer']</span></div>
 				<div class="panel-body item-container">
 					<div class="mainpic-container">

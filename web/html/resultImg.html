@@ -99,6 +99,11 @@ $def with(items)
 				jQuery(obj).children('.panel-heading').slideUp();
 			}
 		</script>
+		<script type="text/javascript">
+			function openitem(id){
+				window.location.href = '/item?id='+id;
+			}
+		</script>
 	</head>
 
 	<body>
@@ -141,7 +146,7 @@ $def with(items)
 		<div id='header-helper'></div>
 		<div id="body">
 			$for item in items:
-			<div class="panel panel-info item" onclick="window.open('')" onmouseenter="namedown(this)" onmouseleave="nameup(this)">
+			<div class="panel panel-info item" onclick="openitem($item['id'])" onmouseenter="namedown(this)" onmouseleave="nameup(this)">
 				<div class="panel-heading">$item['name']</div>
 				<div class="item-container">
 					<img class="mainpic" src="$item['imgurl']" alt="$item['name']">

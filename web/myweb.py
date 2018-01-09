@@ -27,6 +27,7 @@ urls = (
 	'/imgsearch','imgsearch',
 	'/rank','gamerank',
 	'/companysearch','companysearch',
+	'/item','item'
 )
 
 render = web.template.render('html')
@@ -36,10 +37,13 @@ def gamesearcher(command,rankmod=0):
 	lresult = searcher.keywordsearch(command,rankmod)
 	res = []
 	for game in lresult:
-		if len(game.get('tags')) >= 40:
-			tags = game.get('tags')[:40].split(' ')[:-1]
-		else:
-			tags = game.get('tags').split(' ')
+		tags = ''
+		try:
+			if len(game.get('tags')) >= 40:
+				tags = game.get('tags')[:40].split(' ')[:-1]
+			else:
+				tags = game.get('tags').split(' ')
+		except:pass
 		res.append({'name':game.get('name'),
 					'id':game.get('id'),
 					'producer':game.get('producer'),
@@ -54,10 +58,13 @@ def companysearcher(command):
 	lresult = searcher.producersearch(command)
 	res = []
 	for game in lresult:
-		if len(game.get('tags')) >= 40:
-			tags = game.get('tags')[:40].split(' ')[:-1]
-		else:
-			tags = game.get('tags').split(' ')
+		tags = ''
+		try:
+			if len(game.get('tags')) >= 40:
+				tags = game.get('tags')[:40].split(' ')[:-1]
+			else:
+				tags = game.get('tags').split(' ')
+		except:pass
 		res.append({'name':game.get('name'),
 					'id':game.get('id'),
 					'producer':game.get('producer'),
@@ -84,10 +91,34 @@ def imgsearcher(filename):
 	res = []
 	if similars != None:
 		for imgurl in similars:
+			imgid = getID(imgurl)
 			res.append({'imgurl':imgurl,
-						'name':getnamebyid(int(getID(imgurl)))
+						'name':getnamebyid(int(imgid)),
+						'id':imgid
 				})
 	return res
+
+def gamegetter(id):
+	vm_env.attachCurrentThread()
+	lres = searcher.idget(id)
+	lres['description'] = ''.join(lres['description'].split(' '))
+	for i in range(len(lres['vector'])):
+		lres['vector'][i] = int((lres['vector'][i]+0.3)*180)
+	lres['tags'] = lres['tags'].split(' ')
+	lres['rev'] = []
+	for review in lres['review']:
+		lres['rev'].append({'authorid':review['author']['steamid'],
+							'playtime':review['author']['playtime_forever'],
+							'review-content':review['review']
+			})
+	del lres['review']
+	lres['rel'] = []
+	for relatedid in lres['related']:
+		vm_env.attachCurrentThread()
+		lrres = searcher.idget(int(relatedid))
+		lres['rel'].append({'name':lrres['name'],'tags':lrres['tags'].split(' '),'id':relatedid})
+	del lres['related']
+	return lres
 
 class home:
 	def GET(self):
@@ -183,6 +214,16 @@ class companysearch:
 		else:
 			res = companysearcher(keywords)
 			return render.resultCompany(keywords,res,0)
+
+class item:
+	def GET(self):
+		user_data = web.input()
+		id = user_data.id
+		visited = web.cookies(visit="")
+		web.setcookie('visit', visited+'|'+id)
+		item = gamegetter(int(id))
+		return render.itemGame(item)
+
 
 if __name__ == '__main__':
 	app = web.application(urls,globals())
