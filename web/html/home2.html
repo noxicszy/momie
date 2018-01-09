@@ -1,4 +1,4 @@
-$def with(ifC)
+$def with(ifC,items)
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -102,7 +102,7 @@ $def with(ifC)
     }
 
     #guessyoulike {
-        width: 40%;
+        width: 47%;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -118,8 +118,8 @@ $def with(ifC)
     .item {
         margin-top: 0px;
         margin-bottom: 20px;
-        margin-left: 10px;
-        margin-right: 10px;
+        margin-left: 0px;
+        margin-right: 0px;
         width: 100%;
         cursor: pointer;
     }
@@ -256,6 +256,9 @@ $def with(ifC)
             jQuery(window).resize(function(){
             mydiv_move();
             });
+            jQuery(window).scroll(function(){
+            mydiv_move();
+            });
         });
     </script>
     <!-- the guesser -->
@@ -296,6 +299,11 @@ $def with(ifC)
         cursor: pointer;
     }
     </style>
+    <script type="text/javascript">
+        function openitem(id){
+            window.location.href = '/item?id='+id;
+        }
+    </script>
 </head>
 
 <body id='body'>
@@ -349,25 +357,27 @@ $def with(ifC)
         </form>
         <div id="guessyoulike">
             <div id='gstitle'>guess you like</div>
-            <div class="panel panel-info item" onclick="">
-                <div class="panel-heading">gamename</div>
-                <div class="panel-body item-container">
-                    <div class="mainpic-container">
-                        <img class="mainpic" src="static/img/steam.jpg">
-                    </div>
-                    <div class="mainmsg-container">
-                        <div class="tags-container">
-                            <div class="tag">tag1</div>
-                            <div class="tag">tag2dfd</div>
-                            <div class="tag">tag1</div>
+            <div id='item-container' style="overflow-y:auto;height: 480px;width:90%;padding: 0">
+            $for i in items:
+                <div class="panel panel-info item" onclick="openitem($i['id'])">
+                    <div class="panel-heading">$i['name']</div>
+                    <div class="panel-body item-container">
+                        <div class="mainpic-container">
+                            <img class="mainpic" src="$i['cover']">
                         </div>
-                        <HR style="" width="80%" color=#987cb9 SIZE=10>
-                        <div class="others-container">
-                            producer:haha id:493848
+                        <div class="mainmsg-container">
+                            <div class="tags-container">
+                                $for tag in i['tags']:
+                                    <div class="tag">$tag</div>
+                            </div>
+                            <HR style="" width="80%" color=#987cb9 SIZE=10>
+                            <div class="others-container">
+                                producer:$i['producer'] id:$i['id']
+                            </div>
                         </div>
-                    </div>
-                    <div class="price-container">
-                        &yen;56
+                        <div class="price-container">
+                            $i['price']
+                        </div>
                     </div>
                 </div>
             </div>

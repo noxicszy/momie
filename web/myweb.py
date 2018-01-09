@@ -13,6 +13,7 @@ from itemindex.queryguesser import *
 from itemindex.gamesearcher import *
 from webfetch.picture_query.ImageSet import *
 from itemindex.querycorrection import *
+from related.guess import *
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -104,7 +105,9 @@ def gamegetter(id):
 	lres['description'] = ''.join(lres['description'].split(' '))
 	for i in range(len(lres['vector'])):
 		lres['vector'][i] = int((lres['vector'][i]+0.3)*180)
-	lres['tags'] = lres['tags'].split(' ')
+	try:
+		lres['tags'] = lres['tags'].split(' ')
+	except:pass
 	lres['rev'] = []
 	for review in lres['review']:
 		lres['rev'].append({'authorid':review['author']['steamid'],
@@ -116,18 +119,42 @@ def gamegetter(id):
 	for relatedid in lres['related']:
 		vm_env.attachCurrentThread()
 		lrres = searcher.idget(int(relatedid))
-		lres['rel'].append({'name':lrres['name'],'tags':lrres['tags'].split(' '),'id':relatedid})
+		tags = []
+		try:
+			tags = lrres['tags'][:40].split(' ')
+		except:pass
+		lres['rel'].append({'name':lrres['name'],'tags':tags,'id':relatedid})
 	del lres['related']
+	del lres['names']
+	return lres
+
+def minigamegetter(id):
+	vm_env.attachCurrentThread()
+	lres = searcher.idget(id)
+	try:
+		if len(lres['tags']) >= 40:
+			lres['tags'] = lres['tags'][:40].split(' ')[:-1]
+		else:
+			lres['tags'] = lres['tags'].split(' ')
+	except:pass
+	del lres['description'],lres['vector'],lres['review'],lres['related'],lres['names'],lres['urls']
 	return lres
 
 class home:
 	def GET(self):
 		user_data = web.input()
+		visited = web.cookies(visit="").visit.strip()
+		print 'v',visited
+		visited = visited.split('|')[:-1]
+		print visited
+		items = []
+		for id in guess(visited):
+			items.append(minigamegetter(int(id)))
 		try:
 			ifC = user_data.ifC
-			return render.home2(1)
+			return render.home2(1,items)
 		except:
-			return render.home2(0)
+			return render.home2(0,items)
 
 class guesser:
 	def GET(self):
@@ -219,8 +246,9 @@ class item:
 	def GET(self):
 		user_data = web.input()
 		id = user_data.id
-		visited = web.cookies(visit="")
-		web.setcookie('visit', visited+'|'+id)
+		visited = web.cookies(visit="").visit
+		print 1,visited
+		web.setcookie('visit', visited+id+'|')
 		item = gamegetter(int(id))
 		return render.itemGame(item)
 

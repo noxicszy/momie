@@ -134,9 +134,10 @@ class GameSearcher:
         # print type(doc.get("urls"))
         res["related"]  =   doc.get("related").split()
         vector = []
-        for i in doc.get("vector")[1:-1].split(","):
-            vector.append(float(i))
-        assert len(vector) == 6
+        if doc.get("vector"):
+            for i in doc.get("vector")[1:-1].split(","):
+                vector.append(float(i))
+            assert len(vector) == 6
         res["vector"] = vector
         root  = os.path.join("../datastore/steam_reviews",str(ID))
         try:
