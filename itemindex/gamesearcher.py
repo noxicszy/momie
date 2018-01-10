@@ -132,7 +132,10 @@ class GameSearcher:
         res["producer"] = doc.get("producer")
         res["price"]  =   doc.get("price")
         # print type(doc.get("urls"))
-        res["related"]  =   doc.get("related").split()
+        try:
+            res["related"]  =   doc.get("related").split()
+        except:
+            res["related"] = []
         vector = []
         if doc.get("vector"):
             for i in doc.get("vector")[1:-1].split(","):

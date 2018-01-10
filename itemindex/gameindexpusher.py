@@ -1,3 +1,4 @@
+#-^-coding:utf-8-^-
 from gameindexer import IndexFiles
 import gameindexer
 import os
@@ -91,11 +92,11 @@ def changes_steamreviews():
 
 # for chan in changes_guessednames():
 #     indexer.updatedoc(chan[0],chan[1],mod = "add",writer = writer,searcher = searcher)
-for chan in changes_steamreviews():
-    indexer.updatedoc(chan[0],chan[1],mod = "add",writer = writer,searcher = searcher)
+#for chan in changes_steamreviews():
+#    indexer.updatedoc(chan[0],chan[1],mod = "add",writer = writer,searcher = searcher)
     # print chan
 
-# indexer.updatedoc(10,[("name","cs")],mod = "add",writer = writer,searcher = searcher)
+indexer.updatedoc(346010,[("review","设计 机械 攻城 设计 机械 攻城 设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城  设计 机械 攻城 ".decode("utf8"))],mod = "add",writer = writer,searcher = searcher)
 
 writer.commit()
 writer.close()

@@ -103,6 +103,11 @@ $def with(items)
 			function openitem(id){
 				window.location.href = '/item?id='+id;
 			}
+			jQuery(function () {
+	          jQuery('[data-toggle="popover"]').popover({
+	            container: 'body'
+	          });
+	        });
 		</script>
 	</head>
 
@@ -134,7 +139,7 @@ $def with(items)
 					<div>
 						<ul class="nav navbar-nav navbar-right">
 							<li>
-								<a href="#" style="font-size:large">About</a>
+								<a href="#" style="font-size:large;"  data-trigger="focus" tabindex="0" role="button" data-toggle="popover" title="welcome" data-placement="bottom" data-content='Momie是一个建立在Steam游戏库基础上的，具备游戏信息查询，游戏评分，游戏相关度，别名识别等功能的，兼备文本与图片搜索的，功能全面、简单方便的游戏搜索引擎。Momie的强大性在于它不只是一个简单的对Steam的辅助粘贴，它对Steam中的大量信息进行了整合，并从当代青年的审美观出发，对游戏做了全新的评价机制和关联机制，更是可以帮助你找到一些你不清楚原名的游戏。——Momie开发团队'>About</a>
 							</li>
 						</ul>
 					</div>
