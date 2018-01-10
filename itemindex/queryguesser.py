@@ -141,15 +141,15 @@ class QueryGuesser():
                     distances[j+1][i+1] = min(distances[j][i],distances[j+1][i],distances[j][i+1])+1
                 else: 
                     distances[j+1][i+1] = min(distances[j][i],distances[j+1][i],distances[j][i+1])
-        print text1 , distances[-1][-1]
+        # print text1 , distances[-1][-1]
         return distances[-1][-1]<=min(2,len(text1)/3)
     
     def similar(self,a,b):
         if len(b)<len(a):
-            print"len", a,b   
+            # print"len", a,b   
             return False
         if self.comp(a[:-1],b[:len(a)-1]):
-            print"comp", a,b   
+            # print"comp", a,b   
             return False
         return self.editsimilar(a[-1].lower(),b[len(a)-1].lower())
 
@@ -175,11 +175,11 @@ class QueryGuesser():
                 break 
         if not self.similar(x,self.possibits[mid]):
             # print "mid+1"
-            print mid
+            # print mid
             mid-=1
         #print "[]"+" ".join(self.possibits[mid]).encode("utf8")
-        print mid
-        print self.similar(x,self.possibits[mid])
+        # print mid
+        # print self.similar(x,self.possibits[mid])
         high = mid
         low = mid
         # for i in range(-10,10):
