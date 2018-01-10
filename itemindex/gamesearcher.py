@@ -132,7 +132,10 @@ class GameSearcher:
         res["producer"] = doc.get("producer")
         res["price"]  =   doc.get("price")
         # print type(doc.get("urls"))
-        res["related"]  =   doc.get("related").split()
+        try:
+            res["related"]  =   doc.get("related").split()
+        except:
+            print "NO related"
         vector = []
         if doc.get("vector"):
             for i in doc.get("vector")[1:-1].split(","):
@@ -171,13 +174,15 @@ if __name__ == '__main__':
                 print i.get("id"),i.get("name")#,i.get("vector")
                 pass
     elif True:
-        d = searcher.idget(240720)
+        d = searcher.idget(437920)
         if d:
             print d.get("id"),d.get("name"),d.get("urls"),d.get("producer")
             print d.get("price"),d.get("description")
             print d.get("related")
             print d.get("vector")
             print d.get("names")
+            print "reviews",len(d.get("review"))
+            print type(d.get("name"))
             # print type(d.get("urls"))
             # print type(d.get("related"))
             # print type(d.get("vector"))
@@ -191,6 +196,7 @@ if __name__ == '__main__':
                 print d.get("related")
                 print d.get("vector")
                 print d.get("names")
+                print "reviews",len(d.get("review"))
                 #print d.get("review")
                 
     else:

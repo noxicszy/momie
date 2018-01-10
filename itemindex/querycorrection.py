@@ -140,6 +140,6 @@ class QueryCorrecter():
     #print ans
 correcter = QueryCorrecter()
 if __name__ == '__main__':
-    print correcter.correct("aurckingdm")
+    print correcter.correct("")
 
 
