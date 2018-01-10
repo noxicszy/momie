@@ -51,13 +51,22 @@ class QueryGuesser():
         STORE_DIR = "index"
         directory = SimpleFSDirectory(File(STORE_DIR))
         ireader = DirectoryReader.open(directory)
+        # nameset = set()
         for docnum in xrange(0, ireader.numDocs()):
             doc = ireader.document(docnum)
             names = doc.get("name")
             for name in names.split("\t"):
+                # nameset.add(self.modify(name))
                 self.possibits.append(self.modify(name))
+        # self.possibits = sorted(list(nameset),cmp=self.comp)
         self.possibits.sort(cmp=self.comp)
-        print self.possibits
+        i = 0
+        # for i in range(len(self.possibits)-1):
+        while i<len(self.possibits)-1:
+            if self.possibits[i]==self.possibits[i+1]:
+                del self.possibits[i]
+            i+=1
+        #print self.possibits
         with open(self.stordir,"wb") as f:
             pickle.dump(self.possibits,f)
         
@@ -132,15 +141,16 @@ class QueryGuesser():
                     distances[j+1][i+1] = min(distances[j][i],distances[j+1][i],distances[j][i+1])+1
                 else: 
                     distances[j+1][i+1] = min(distances[j][i],distances[j+1][i],distances[j][i+1])
-    
-        return distances[-1][-1]<=min(2,len(text1)/4)
+        # print text1 , distances[-1][-1]
+        return distances[-1][-1]<=min(2,len(text1)/3)
     
     def similar(self,a,b):
         if len(b)<len(a):
+            # print"len", a,b   
             return False
         if self.comp(a[:-1],b[:len(a)-1]):
+            # print"comp", a,b   
             return False
-
         return self.editsimilar(a[-1].lower(),b[len(a)-1].lower())
 
     def bisect(self,x,comp=None):
@@ -164,8 +174,12 @@ class QueryGuesser():
             else:  
                 break 
         if not self.similar(x,self.possibits[mid]):
-            mid+=1
+            # print "mid+1"
+            # print mid
+            mid-=1
         #print "[]"+" ".join(self.possibits[mid]).encode("utf8")
+        # print mid
+        # print self.similar(x,self.possibits[mid])
         high = mid
         low = mid
         # for i in range(-10,10):
@@ -217,14 +231,15 @@ class QueryGuesser():
     #print ans
 if __name__=="__main__":
     qg = QueryGuesser()
-    #print correcter.correct("aur kingdm")    
+    # print correcter.correct("aur kingdm")    
     # print qg.modify("abc12#4沃日#ri".decode("utf8"))
     while True:
-
+        # pass
         for i in qg.guess(raw_input().decode("utf8")):
             print "[res]",i
 
-
+    # for i in qg.guess("getting over it with bennet".decode("utf8")):
+    #     print "[res]",i
 # for i in range(10):
 #     print "逮".join(qg.possibits[i+80] ).encode("utf8")#前84至100多大概为中文
 # for i in qg.guess("train simulator")
