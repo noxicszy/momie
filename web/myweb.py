@@ -33,9 +33,9 @@ urls = (
 
 render = web.template.render('html')
 
-def gamesearcher(command,rankmod=0):
+def gamesearcher(command,rankmod=0,searchmod='title'):
 	vm_env.attachCurrentThread()
-	lresult = searcher.keywordsearch(command,rankmod)
+	lresult = searcher.keywordsearch(command,rankmod,searchmod)
 	res = []
 	for game in lresult:
 		tags = ''
@@ -99,15 +99,27 @@ def imgsearcher(filename):
 				})
 	return res
 
+def is_chinese(s):
+    try:
+        us = s.decode('utf-8')
+    except:
+        us = s
+    for uchar in us:
+        if uchar >= u'\u4e00' and uchar<=u'\u9fa5':
+            return True
+    return False
+
 def gamegetter(id):
 	vm_env.attachCurrentThread()
 	lres = searcher.idget(id)
-	lres['description'] = ''.join(lres['description'].split(' '))
+	if is_chinese(lres['description']):
+		lres['description'] = ''.join(lres['description'].split(' '))
 	for i in range(len(lres['vector'])):
 		lres['vector'][i] = int((lres['vector'][i]+0.3)*180)
 	try:
 		lres['tags'] = lres['tags'].split(' ')
-	except:pass
+	except:
+		lres['tags'] = []
 	lres['rev'] = []
 	for review in lres['review']:
 		lres['rev'].append({'authorid':review['author']['steamid'],
@@ -144,7 +156,6 @@ class home:
 	def GET(self):
 		user_data = web.input()
 		visited = web.cookies(visit="").visit.strip()
-		print 'v',visited
 		visited = visited.split('|')[:-1]
 		print visited
 		items = []
@@ -173,21 +184,28 @@ class gamesearch:
 		except:
 			ifcorrect = 'true'
 
+		try:
+			ifcontent = user_data.gORcon
+		except:
+			ifcontent = 'title'
+
 		if ifcorrect == 'true':
 			corrected = correcter.correct(keywords)
+			#改正后没变
 			if corrected == None or corrected == keywords:
-				res = gamesearcher(keywords)
-				return render.resultGame(keywords,res,0)
+				res = gamesearcher(keywords,searchmod=ifcontent)
+				return render.resultGame(keywords,res,0,ifcontent)
 			else:
-				res = gamesearcher(corrected)
+				res = gamesearcher(corrected,searchmod=ifcontent)
+				#改正后无搜索结果
 				if res == []:
-					res = gamesearcher(keywords)
-					return render.resultGame(keywords,res,0)
+					res = gamesearcher(keywords,searchmod=ifcontent)
+					return render.resultGame(keywords,res,0,ifcontent)
 				else:
-					return render.resultGame(corrected,res,keywords)
+					return render.resultGame(corrected,res,keywords,ifcontent)
 		else:
-			res = gamesearcher(keywords)
-			return render.resultGame(keywords,res,0)
+			res = gamesearcher(keywords,searchmod=ifcontent)
+			return render.resultGame(keywords,res,0,ifcontent)
 		
 		
 
@@ -214,7 +232,12 @@ class gamerank:
 		user_data = web.input()
 		keywords = user_data.keyword
 		rankmod = int(user_data.rankmod)
-		res = gamesearcher(keywords,rankmod)
+		try:
+			ifcontent = user_data.gORcon
+			print ifcontent
+		except:
+			ifcontent = 'title'
+		res = gamesearcher(keywords,rankmod,ifcontent)
 		return json.dumps(res)
 
 class companysearch:
@@ -247,7 +270,6 @@ class item:
 		user_data = web.input()
 		id = user_data.id
 		visited = web.cookies(visit="").visit
-		print 1,visited
 		web.setcookie('visit', visited+id+'|')
 		item = gamegetter(int(id))
 		return render.itemGame(item)

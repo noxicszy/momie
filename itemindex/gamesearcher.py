@@ -144,7 +144,7 @@ class GameSearcher:
         try:
             res["related"]  =   doc.get("related").split()
         except:
-            print "NO related"
+            res["related"] = []
         vector = []
         if doc.get("vector"):
             for i in doc.get("vector")[1:-1].split(","):
