@@ -123,15 +123,15 @@ $def with(items)
 								<input style="width:250px;border:1px solid #5bc0dc;" name='keyword' id='input' type="text" class="form-control" placeholder="Search" required="true" value='' >
 							</div>
 							<div class="btn-group" role="group" aria-label="...">
-								<script>
-									function switchmomie(){
-										var keyword=jQuery('#input').val();
-										window.location.href = '/?keyword='+keyword;
-									}
-								</script>
 								<button type="submit" class="btn btn-info">momie</button>
 								<button type="button" class="btn btn-warning" onclick="switchmomie()">Switch to momie@Company</button>
 							</div>
+							<script>
+								function switchmomie(){
+									var keyword=jQuery('#input').val();
+									window.location.href = '/?keyword='+keyword;
+								}
+							</script>
 						</form>
 					</div>
 
