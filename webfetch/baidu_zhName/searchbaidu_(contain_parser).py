@@ -29,7 +29,7 @@ def add_pages_to_folder(searchName, content, filename, baidu_folder):
         os.mkdir(folder)
     filename = os.path.join(folder, filename)
     with open(filename, 'w') as f:
-        f.write(searchName+"\n")
+        f.write(searchName)
         f.write(content)               
 
 
@@ -119,8 +119,11 @@ page_per_app = 5
 
 id_name_list = []
 with open('app_name.txt', 'r') as f:
-    for line in f.readlines()[:10]:
+    for line in f.readlines()[:2000]:
         line = line.strip().split('\t')
-        id_name_list.append((line[0], line[1]))
+        try:
+            id_name_list.append((line[0], line[1]))
+        except:
+            print "error",line
 
-search(id_name_list, 10)
+search(id_name_list, 1999)
