@@ -5,25 +5,24 @@
 the data stored in the index system is based on pylucene.
 for each game, store the fields of  main name, other names and nickname                                     name
                                     the description passages of the game for rough search                   description
-                                    the 知乎里被人为归类推荐的如“有哪些适合学英语的游戏？”                          list
+                                    the 知乎里被人为归类推荐的如“有哪些适合学英语的游戏？”                          list（未完成）
                                         比如用户输入了“学习英语”，呈现给用户的时候有“XXX游戏——来自知乎帖子xxxxxxxx”
-                                    the 系列信息                                                              series
                                     the producer                                                            producer
                                     the vecter using "words to vector" tech for sorting (not indexed)       vector
                                     the other links and contents to present to the user
                                                                                                             id
                                                                                                             tags
                                                                                                             review
-                                    images
-                                    facets??
+                                    images                                                                  urls
+                                    
     the system should first search the naming field which is presented at the top if it exists
     then search the human arranged lists
     and search the description passages,(it would be better if we can using the synax for key words)
         using the NLP model and the game vectors to sort the list
 
 2017-12-18 新增
-            TODO：利用nltk的maxentropy 训练sentiment analysis
-            TODO：利用Stanford的pos tagging 寻找语料中的动宾词汇对，添加到向量中
+            TODO：利用nltk的maxentropy 训练sentiment analysis                 未完成
+            TODO：利用Stanford的pos tagging 寻找语料中的动宾词汇对，添加到向量中   完成了sentiment analysis
 """
 INDEX_DIR = "IndexFiles.index"
 
@@ -41,14 +40,6 @@ from org.apache.lucene.search import NumericRangeQuery
 from org.apache.lucene.util import Version
 from org.apache.lucene.search import IndexSearcher
 from org.apache.lucene.index import DirectoryReader
-"""
-This class is loosely based on the Lucene (java implementation) demo class 
-org.apache.lucene.demo.IndexFiles.  It will take a directory as an argument
-and will index all of the files in that directory and downward recursively.
-It will index on the file path, the file name and the file contents.  The
-resulting Lucene index will be placed in the current directory and called
-'index'.
-"""
 
 #TODO 引入log机制，记录存了的和删了的，失败了的内容
 
@@ -73,20 +64,7 @@ class IndexFiles(object):
         #self.dir = storeDir
         self.store = SimpleFSDirectory(File(storeDir))
         self.analyzer = LimitTokenCountAnalyzer(analyzer, 1048576)
-        
-
-        '''
-        root = "tempdata"
-        #self.indexDocs(root, writer)
-        ticker = Ticker()
-        print 'commit index',
-        threading.Thread(target=ticker.run).start()
-        writer.commit()
-        writer.close()
-        ticker.tick = False
-        print 'done'
-        '''
-    
+ 
     # def getanalyzer(self,fieldname):
     #     t1types = ["series","name"]
     #     t2types = ["description","list"]
@@ -103,6 +81,9 @@ class IndexFiles(object):
         
     
     def getfieldType(self,fieldname):
+        """
+        给不同的filed返回不同的储存方式 其中ID是int型
+        """
         t1 = FieldType()
         t1.setIndexed(True)
         t1.setStored(True)
@@ -208,11 +189,15 @@ class IndexFiles(object):
         if opened:
             writer.commit()
             writer.close()
-    #TODO：增加update 在已有条目的基础上添加新field
+    #TODO：增加update 在已有条目的基础上添加新field                （完成）
     
     def updatedoc(self,appid,updates,mod = "add",writer = None,searcher = None):
         #the format of the updates:
         #[(field 1,value 1),().....]
+        """
+        更新doc中的信息， writer 和 searcher可以传入已经打开的writer和searcher更加方便
+        mod是 add时 把信息加在原有信息之上。
+        """
         opened = False
         if writer == None:
             opened = True

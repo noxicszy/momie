@@ -36,10 +36,10 @@ class GameSearcher:
         self.STORE_DIR = "index"
         vm_env.attachCurrentThread()
         print 'lucene', lucene.VERSION
-        #base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
         self.directory = SimpleFSDirectory(File(self.STORE_DIR))
         self.searcher = IndexSearcher(DirectoryReader.open(self.directory))
         self.analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
+        #在两种搜索方式时的各种field的权重
         self.weights = {
             "title":{
                 "name":10,
@@ -58,6 +58,7 @@ class GameSearcher:
         }
     
     def namemodifier(self,name):
+        #假设输入的是名字，把输入的query中的标点去掉
         punctuation = (string.punctuation+"‘（）。，、；’【、】`～！￥%……&×——+=-|：”《》？,™,の,®").decode('utf-8')
         tempname = ""
         name = name.decode("utf8")
@@ -67,6 +68,7 @@ class GameSearcher:
         return tempname.encode("utf8")
 
     def producersearch(self,command):
+        #通过公司搜索
         command = " ".join(jieba.cut(command))
         query = QueryParser(Version.LUCENE_CURRENT, "producer",self.analyzer).parse(command)
         scoreDocs = self.searcher.search(query, 20).scoreDocs
@@ -78,12 +80,16 @@ class GameSearcher:
         """
         rankmod 可以是可以改变的优先级排序，比如可以是“画质”，“剧情”，“人设”，“打击感”等等
         KeyWords = ["画面","剧情","人物","操作","音乐","创意"] 用1,2,3,4,5，6表示 0表示默认排序
+        searchmod title和content 分别是通过标题，标签等等信息和通过描述评论等等信息搜索。
         返回一个doc字典构成的list
+        方法：
+            使用lucene搜索特定的域，把搜索的结果整合起来，把lucene返回的score按照不同的权重相加，
+            name域的相加方法是一个非线性的函数
+            再通过rankmod参数叠加一个sentiment analysis得到的score，最后得出排序结果
         """
         rank = {}
         info = {}
         #第一级 搜索名字
-        #不如直接利用querycorrection和queryguesser
         if not self.namemodifier(command):
             return
         query = QueryParser(Version.LUCENE_CURRENT, "name",self.analyzer).parse(self.namemodifier(command))
@@ -118,6 +124,9 @@ class GameSearcher:
             # print 'id:', doc.get("id"),'name:', doc.get("name"), '\ndescription:', doc.get("description"),'\nlist:', doc.get("list"),'\nseries:', doc.get("series"),'\nvector:', doc.get("vector"),"\n\n"
     
     def idget(self,ID):
+        """
+        用于前端获得网页信息，其中评论不是从lucene中取得，而是由从steam爬下来的源文件取得，这样包含评论用户名等信息
+        """
         query = NumericRangeQuery.newIntRange("id", ID, ID, True, True)
         scoreDocs = self.searcher.search(query, 20).scoreDocs
         if not scoreDocs:

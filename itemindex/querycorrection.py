@@ -140,6 +140,7 @@ class QueryCorrecter():
     #print ans
 correcter = QueryCorrecter()
 if __name__ == '__main__':
-    print correcter.correct("")
+    while True:
+        print correcter.correct(raw_input().decode("utf8"))
 
 

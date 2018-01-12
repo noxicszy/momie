@@ -16,7 +16,6 @@ from pypinyin import pinyin, lazy_pinyin
 
 原理：
     存储一个列表作为所有可行的猜测结果，使用二分搜索来寻找可能的结果
-TODO:guess 的结果应该有个排序
 """
 
 class QueryGuesser():
@@ -36,6 +35,10 @@ class QueryGuesser():
 
 
     def storename(self):
+        """
+        从lucene中得到所有的name 存到self.posibilities里面。
+        一般整个工程只用执行一次，在生成了posibilities之后存到pickle文件中下次可以直接加载使用
+        """
         import lucene
         from java.io import File
         from org.apache.lucene.analysis.miscellaneous import LimitTokenCountAnalyzer
@@ -200,11 +203,6 @@ class QueryGuesser():
                 ans.append(self.possibits[mid-i])
             i+=1
         return ans
-
-        
-
-
-
 
     def guess(self,query):
         """
