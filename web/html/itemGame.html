@@ -348,7 +348,7 @@ $def with(game)
 			<div class='list-group' id='related-container'>
 			  	<a class="list-group-item" style="font-size:20px;font-family: 'microsoft yahei';background-color: #60CBE9;color:whitesmoke">相关游戏</a>
 			  	$for related in game['rel']:
-					<a href="/item?id=$related['id']" class="list-group-item related"><h3 class='relatedname'>$related['name']</h4>
+					<a href="/item?id=$related['id']" class="list-group-item related"><h3 class='relatedname'>$related['name']</h3>
 						<div id='tags-container' style='background-color: inherit;justify-content: flex-start;'>
 							$for tag in related['tags']:
 								<div class="tag">$tag</div>
